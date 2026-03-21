@@ -1,26 +1,224 @@
-@import "tailwindcss";
+@import "../styles/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ──────────────────────────────────────────── */
+/*  Base Reset & Body                            */
+/* ──────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: light;
+  }
+
+  html {
+    height: 100%;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    min-height: 100%;
+    background-color: var(--color-light-bg);
+    color: var(--color-light-body-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Dark mode via .dark class on <html> */
+  html.dark body {
+    background-color: var(--color-dark-bg);
+    color: var(--color-dark-body-text);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ──────────────────────────────────────────── */
+/*  Scrollbar                                    */
+/* ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #828FA3; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #635FC7; }
+
+/* ──────────────────────────────────────────── */
+/*  Layout Helpers                              */
+/* ──────────────────────────────────────────── */
+@layer components {
+
+  /* ── Sidebar ── */
+  .sidebar {
+    @apply flex flex-col fixed left-0 top-0 h-full z-30;
+    width: 300px;
+    background-color: var(--color-light-sidebar);
+    border-right: 1px solid var(--color-light-line);
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.35s ease;
+  }
+
+  html.dark .sidebar {
+    background-color: var(--color-dark-sidebar);
+    border-right-color: var(--color-dark-line);
+  }
+
+  .sidebar-hidden .sidebar {
+    transform: translateX(-100%);
+  }
+
+  /* ── Header ── */
+  .header {
+    @apply fixed top-0 right-0 z-20 flex items-center justify-between px-6;
+    height: 97px;
+    left: 300px;
+    background-color: var(--color-light-header);
+    border-bottom: 1px solid var(--color-light-line);
+    transition: background-color 0.3s ease, left 0.35s ease, border-color 0.3s ease;
+  }
+
+  html.dark .header {
+    background-color: var(--color-dark-header);
+    border-bottom-color: var(--color-dark-line);
+  }
+
+  .sidebar-hidden .header {
+    left: 0;
+  }
+
+  /* ── Board Area ── */
+  .board-area {
+    @apply flex gap-6 p-6 overflow-x-auto min-h-screen;
+    margin-left: 300px;
+    padding-top: calc(97px + 24px);
+    transition: margin-left 0.35s ease;
+  }
+
+  .sidebar-hidden .board-area {
+    margin-left: 0;
+  }
+
+  /* ── Column ── */
+  .column {
+    @apply flex flex-col gap-5 shrink-0;
+    width: 280px;
+  }
+
+  /* ── Task Card ── */
+  .task-card {
+    @apply rounded-lg px-4 py-6 cursor-pointer;
+    background-color: var(--color-light-card);
+    box-shadow: 0 4px 6px rgba(54, 78, 126, 0.10);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  html.dark .task-card {
+    background-color: var(--color-dark-card);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  .task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(54, 78, 126, 0.18);
+  }
+
+  html.dark .task-card:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+  }
+
+  /* ── Primary Button ── */
+  .btn-primary {
+    @apply inline-flex items-center gap-1 font-bold rounded-full text-white cursor-pointer transition-all duration-200;
+    background-color: var(--color-brand);
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-brand-hover);
+    transform: scale(1.02);
+  }
+
+  /* ── Nav Board Item ── */
+  .nav-board {
+    @apply flex items-center gap-4 rounded-r-full cursor-pointer font-bold transition-all duration-200;
+    padding: 14px 24px;
+    color: var(--color-light-subtle);
+    font-size: 15px;
+  }
+
+  .nav-board:hover {
+    background-color: var(--color-brand-light);
+    color: var(--color-brand);
+  }
+
+  .nav-board.active {
+    background-color: var(--color-brand);
+    color: white;
+  }
+
+  html.dark .nav-board {
+    color: var(--color-dark-subtle);
+  }
+
+  html.dark .nav-board:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-brand);
+  }
+
+  html.dark .nav-board.active {
+    background-color: var(--color-brand);
+    color: white;
+  }
+
+  /* ── Theme Toggle ── */
+  .theme-toggle-track {
+    @apply flex items-center rounded-full cursor-pointer shrink-0;
+    width: 40px;
+    height: 20px;
+    background-color: var(--color-brand);
+    padding: 2px;
+    transition: background-color 0.3s ease;
+  }
+
+  .theme-toggle-thumb {
+    @apply rounded-full bg-white shrink-0;
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+  }
+
+  html.dark .theme-toggle-thumb {
+    transform: translateX(20px);
+  }
+
+  /* ── New Column Button ── */
+  .new-column-btn {
+    @apply flex items-center justify-center gap-2 rounded-lg font-bold cursor-pointer transition-all duration-200;
+    width: 280px;
+    min-height: 500px;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .new-column-btn:hover {
+    color: var(--color-brand);
+  }
+
+  /* ── Priority Badge ── */
+  .badge-high {
+    @apply inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-bold uppercase tracking-wide;
+    background-color: #FF9898;
+    color: #B22222;
+  }
+
+  /* ── Show Sidebar Button ── */
+  .show-sidebar-btn {
+    @apply hidden fixed bottom-8 left-0 items-center justify-center rounded-r-full cursor-pointer z-40 transition-all duration-200;
+    width: 56px;
+    height: 48px;
+    background-color: var(--color-brand);
+  }
+
+  .show-sidebar-btn:hover {
+    background-color: var(--color-brand-hover);
+  }
+
+  .sidebar-hidden .show-sidebar-btn {
+    @apply flex;
+  }
 }
