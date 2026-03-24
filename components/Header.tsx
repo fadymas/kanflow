@@ -35,7 +35,7 @@ import {
 } from './ui/sheet'
 function Header() {
   return (
-    <header className="flex items-center justify-between  lg:px-8 lg:h-24  px-5 py-4 lg:py-0 k-panal">
+    <header className="flex items-center justify-between  lg:px-8 lg:h-24  px-5 py-4 lg:py-0 k-panal border-b border-kborder">
       <div className="logo flex justify-center items-center ">
         <Image
           src="/logo.png"

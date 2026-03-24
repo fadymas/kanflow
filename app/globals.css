@@ -8,18 +8,24 @@
   --color-kbackground: var(--kbackground);
   --color-kforeground: var(--kforeground);
   --color-kpanal: var(--kpanal);
+  --color-kborder: var(--kborder);
+  --color-knetural-default: var(--knetural-default);
 }
 
 :root {
   --kbackground: #f8f9ff;
   --kforeground: #20212c;
   --kpanal: #ffff;
+  --kborder: #e4e7ec;
+  --knetural-default: #474552;
 }
 
 .dark {
   --kbackground: #20212c;
   --kforeground: #f8f9ff;
   --kpanal: #2b2c37;
+  --kborder: #3e3f4e;
+  --knetural-default: #828fa3;
 }
 
 @layer utility {
