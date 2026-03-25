@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +32,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger
-} from './ui/sheet'
+} from '../ui/sheet'
 function Header() {
   return (
     <header className="flex items-center justify-between  lg:px-8 lg:h-24  px-5 py-4 lg:py-0 k-panal border-b border-kborder">
