@@ -14,13 +14,12 @@ export default async function ThemeLayout({ children }: { children: React.ReactN
   const cookieStore = await cookies()
   const theme = cookieStore.get('theme')?.value
   const sidebar_state = cookieStore.get('sidebar_state')?.value
-  console.log(sidebar_state)
   return (
-    <html suppressHydrationWarning lang="en" className={`${plusJakarta.variable} `}>
-      <body className="min-h-screen k-background">
+    <html suppressHydrationWarning lang="en" className={`${plusJakarta.variable}  `}>
+      <body className="min-h-screen k-background   ">
         <ThemeProvider theme={theme ?? 'system'}>
           <Header />
-          <SidebarProvider defaultOpen={sidebar_state === 'true'}>
+          <SidebarProvider defaultOpen={sidebar_state === 'true'} className="">
             <CustomSidebar />
             {children}
           </SidebarProvider>
