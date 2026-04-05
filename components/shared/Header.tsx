@@ -1,25 +1,20 @@
 import Image from 'next/image'
 import { Button } from '../ui/button'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger
@@ -33,10 +28,12 @@ import {
   SheetTitle,
   SheetTrigger
 } from '../ui/sheet'
+import MobileNavMenu from './MobileNavMenu'
+
 function Header() {
   return (
     <header className="flex items-center justify-between  lg:px-8 lg:h-24  px-5 py-4 lg:py-0 k-panal border-b border-kborder">
-      <div className="logo flex justify-center items-center ">
+      <div className="logo flex justify-center items-center gap-3 ">
         <Image
           src="/logo.png"
           alt="Logo"
@@ -45,16 +42,17 @@ function Header() {
           height={46}
           className="lg:w-11.5 lg:h-11.5 w-10"
         />
+        <MobileNavMenu />
       </div>
-      <div className="actions flex gap-6 items-center">
+      <div className="actions flex gap-6 items-center max-lg:gap-3">
         <Dialog>
           <DialogTrigger asChild>
             <Button
               variant="ghost"
-              className="w-40 h-12 rounded-full px-6 py-3 gap-2 from-primary-300 to-primary-400 bg-linear-to-r text-white max-lg:hidden"
+              className="w-40 h-12 rounded-full px-6 py-3 gap-2 from-primary-300 to-primary-400 bg-linear-to-r text-white max-lg:w-1 max-lg:h-1 "
             >
               <Plus />
-              <span>Add New Task</span>
+              <span className="max-lg:hidden">Add New Task</span>
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -70,7 +68,7 @@ function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="max-lg:hidden">
-              <EllipsisVertical />
+              <EllipsisVertical size={18} className="size-4.5! text-knetural-default" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -86,22 +84,6 @@ function Header() {
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" className="lg:hidden size-10">
-              <List size={22} className="w-5.5! h-5.5!" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Are you absolutely sure?</SheetTitle>
-              <SheetDescription>
-                This action cannot be undone. This will permanently delete your account and remove
-                your data from our servers.
-              </SheetDescription>
-            </SheetHeader>
-          </SheetContent>
-        </Sheet>
       </div>
     </header>
   )

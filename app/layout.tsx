@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
-import './globals.css'
 import { Suspense } from 'react'
 import ThemeLayout from '@/components/shared/ThemeLayout'
-
+import './globals.css'
 export const metadata: Metadata = {
   title: 'Kanban Task Management',
   description:

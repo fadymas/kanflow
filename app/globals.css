@@ -1,9 +1,6 @@
+@import 'tailwindcss';
+@plugin 'lightswind/plugin';
 @import '../styles/tailwind.css';
-
-* {
-  box-sizing: border-box;
-  scroll-behavior: smooth;
-}
 
 @theme {
   --color-kbackground: var(--kbackground);
@@ -11,11 +8,9 @@
   --color-kpanal: var(--kpanal);
   --color-kborder: var(--kborder);
   --color-knetural-default: var(--knetural-default);
-  --color-ktask-bg: var(--ktask-bg);
-  --color-ktask-bg-subtle: var(--ktask-bg-subtle);
-  --color-ksubtask-border: var(--ksubtask-border);
-  --color-ksubtask-checked-text: var(--ksubtask-checked-text);
-  --color-ksubtask-text: var(--ksubtask-text);
+  --color-ksubtle: var(--ksubtle);
+  --color-kdescription: var(--kdescription);
+  --color-ksecondary: #4a46ad;
 }
 
 :root {
@@ -25,13 +20,8 @@
   --kpanal: #ffffff;
   --kborder: #e4e7ec;
   --knetural-default: #474552;
-
-  /* Task dialog colors */
-  --ktask-bg: #ffffff;
-  --ktask-bg-subtle: #eff4ff;
-  --ksubtask-border: #c8c4d4;
-  --ksubtask-checked-text: #828fa3;
-  --ksubtask-text: #0f1c2c;
+  --kdescription: #828fa3;
+  --ksubtle: #eff4ff;
 }
 
 .dark {
@@ -41,13 +31,7 @@
   --kpanal: #2b2c37;
   --kborder: #3e3f4e;
   --knetural-default: #828fa3;
-
-  /* Task dialog colors */
-  --ktask-bg: #1e293b;
-  --ktask-bg-subtle: #020617;
-  --ksubtask-border: #334155;
-  --ksubtask-checked-text: #64748b;
-  --ksubtask-text: #ffffff;
+  --ksubtle: #020617;
 }
 
 @layer utility {
@@ -58,73 +42,40 @@
     @apply bg-kpanal;
   }
 
-  /* Typography utilities */
-  .k-task-title {
-    font-family: var(--font-sans);
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 22.5px;
-    color: var(--ktask-text);
+  .scroll-container::-webkit-scrollbar {
+    height: 5px;
+    width: 5px;
   }
 
-  .k-task-description {
-    font-family: var(--font-sans);
+  .scroll-container::-webkit-scrollbar-track {
+    background-color: var(--kpanal);
+  }
+
+  .scroll-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 6px;
+  }
+
+  .scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  /* typography */
+  .bold-12 {
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .bold-20 {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .bold-14 {
     font-size: 14px;
-    font-weight: 400;
-    line-height: 22.75px;
-    color: var(--knetural-default);
+    font-weight: bold;
   }
 
-  .k-task-label {
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #828fa3;
+  /* /typography */
+  .modal-content {
+    @apply lg:max-w-120 w-120 rounded-modal p-8;
   }
-
-  .k-task-subtask {
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 16px;
-    color: var(--ksubtask-text);
-  }
-
-  .k-task-subtask-checked {
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 16px;
-    text-decoration: line-through;
-    color: var(--ksubtask-checked-text);
-  }
-
-  .k-task-status {
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-    color: var(--ksubtask-text);
-  }
-}
-
-.scroll-container::-webkit-scrollbar {
-  height: 5px;
-  width: 5px;
-}
-
-.scroll-container::-webkit-scrollbar-track {
-  background-color: var(--kpanal);
-}
-
-.scroll-container::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 6px;
-}
-
-.scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #555;
 }

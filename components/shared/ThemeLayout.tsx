@@ -5,7 +5,7 @@ import CustomSidebar from './CustomSidebar'
 import { SidebarProvider } from '../ui/sidebar'
 import { ThemeProvider } from 'theme-handler'
 const plusJakarta = Plus_Jakarta_Sans({
-  variable: '--font-sans',
+  variable: '--font-plus-jakarta-sans',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
   display: 'swap'
@@ -17,7 +17,7 @@ export default async function ThemeLayout({ children }: { children: React.ReactN
   return (
     <html suppressHydrationWarning lang="en" className={`${plusJakarta.variable}  `}>
       <body className="min-h-screen k-background   ">
-        <ThemeProvider theme={theme ?? 'system'}>
+        <ThemeProvider theme={theme ?? 'light'}>
           <Header />
           <SidebarProvider defaultOpen={sidebar_state === 'true'} className="">
             <CustomSidebar />

@@ -259,7 +259,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       }}
       {...props}
     >
-      <Eye className="size-4.5!" size={18} />
+      <Eye className="size-4.5! text-knetural-default" size={18} />
       <span>Hide Sidebar</span>
     </Button>
   )

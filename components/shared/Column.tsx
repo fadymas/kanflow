@@ -3,36 +3,17 @@ import TaskCard from './TaskCard'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
-
-export interface TaskData {
-  id: string
-  title: string
-  subtasks?: { completed: number; total: number }
-  priority?: 'low' | 'medium' | 'high'
-  completed?: boolean
-}
+import { Task } from '@/mocks/task.model'
 
 interface ColumnProps {
   title?: string
-  tasks: TaskData[]
-  variant?: 'todo' | 'doing' | 'done'
+  tasks?: Task[]
   isAddNew?: boolean
+  color?: string
   className?: string
 }
 
-const variantStyles = {
-  todo: 'bg-[#d6e3f9] border-2 border-[#635fc7]',
-  doing: 'bg-[#4a46ad]',
-  done: 'bg-[#d6e3f9]'
-}
-
-export default function Column({
-  title,
-  tasks,
-  variant = 'todo',
-  isAddNew = false,
-  className
-}: ColumnProps) {
+export default function Column({ title, tasks, isAddNew = false, color, className }: ColumnProps) {
   if (isAddNew) {
     return (
       <Dialog>
@@ -55,15 +36,15 @@ export default function Column({
   }
 
   return (
-    <div className={cn('flex flex-col gap-6 min-w-75 min-h-full', className)}>
+    <div className={cn('flex flex-col gap-6 max-w-75 min-w-75 w-75 min-h-full', className)}>
       <div className="flex items-center gap-3">
-        <div className={cn('w-4 min-h-full rounded-full', variantStyles[variant])} />
+        <div className={`w-4 min-h-full rounded-full ring`} style={{ backgroundColor: color }} />
         <h3 className="text-[12px] font-bold text-knetural-default tracking-[0.2em]">
-          {title?.toUpperCase()} ({tasks.length})
+          {title?.toUpperCase()} ({tasks?.length})
         </h3>
       </div>
       <div className="flex flex-col gap-6">
-        {tasks.map((task) => (
+        {tasks?.map((task) => (
           <TaskCard key={task.id} task={task} />
         ))}
       </div>
