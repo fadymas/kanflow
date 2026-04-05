@@ -8,7 +8,7 @@ import {
 import { Button } from '../ui/button'
 
 interface DeleteProps {
-  type: 'Task' | 'Board'
+  type: 'Task' | 'Board' | 'Column'
   deleted: string
   openCallback: () => void
 }
@@ -23,6 +23,7 @@ function Delete({ type, deleted, openCallback }: DeleteProps) {
         <DialogTitle className="text-destructive bold-20">
           {type === 'Board' && `Delete "${deleted}" board?`}
           {type === 'Task' && `Delete "${deleted}" task?`}
+          {type === 'Column' && `Delete "${deleted}" column?`}
         </DialogTitle>
       </DialogHeader>
       <DialogDescription className="line-clamp-3 text-ellipsis text-[16px] font-medium">
@@ -31,6 +32,9 @@ function Delete({ type, deleted, openCallback }: DeleteProps) {
 
         {type === 'Task' &&
           `Are you sure you want to delete the "${deleted}" task? This action cannot be reversed.`}
+
+        {type === 'Column' &&
+          `Are you sure you want to delete the "${deleted}" column? This action will remove all tasks and cannot be reversed.`}
       </DialogDescription>
       <DialogFooter className="justify-end gap-4 border-none bg-transparent ">
         <Button

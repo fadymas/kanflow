@@ -5,6 +5,8 @@ import { Dialog, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Task } from '@/mocks/task.model'
 import CreateColumn from '../modals/CreateColumn'
+import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu'
+import CustomMenuContent from './CustomMenuContent'
 
 interface ColumnProps {
   title?: string
@@ -45,11 +47,16 @@ export default function Column({ title, tasks, isAddNew = false, color, classNam
           {title?.toUpperCase()} ({tasks?.length})
         </h3>
       </div>
-      <div className="flex flex-col gap-6">
-        {tasks?.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </div>
+      <ContextMenu>
+        <ContextMenuTrigger className="h-full">
+          <div className="flex flex-col gap-6 h-full">
+            {tasks?.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </div>
+        </ContextMenuTrigger>
+        <CustomMenuContent type="Column" deleted={title || 'Unnamed Column'} />
+      </ContextMenu>
     </div>
   )
 }
