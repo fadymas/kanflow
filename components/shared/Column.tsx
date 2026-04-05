@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Task } from '@/mocks/task.model'
+import CreateColumn from '../modals/CreateColumn'
 
 interface ColumnProps {
   title?: string
@@ -31,6 +32,7 @@ export default function Column({ title, tasks, isAddNew = false, color, classNam
             </span>
           </Button>
         </DialogTrigger>
+        <CreateColumn />
       </Dialog>
     )
   }

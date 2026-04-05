@@ -35,7 +35,7 @@ function Header() {
           </DialogTrigger>
           <CreateTask />
         </Dialog>
-        <CustomDropdownMenu isBoard={true} />
+        <CustomDropdownMenu deleted="boardnow" type="Board" />
       </div>
     </header>
   )

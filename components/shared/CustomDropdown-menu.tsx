@@ -1,5 +1,7 @@
 'use client'
+import { useState } from 'react'
 import CreateBoard from '../modals/CreateBoard'
+import Delete from '../modals/Delete'
 import { Button } from '../ui/button'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import {
@@ -12,10 +14,12 @@ import {
 import { EllipsisVertical, PencilIcon, Plus, TrashIcon } from 'lucide-react'
 
 interface Props {
-  isBoard?: boolean
+  type: 'Board' | 'Task'
+  deleted: string
 }
 
-function CustomDropdownMenu({ isBoard }: Props) {
+function CustomDropdownMenu({ type, deleted }: Props) {
+  const [open, setOpen] = useState(false)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -24,7 +28,7 @@ function CustomDropdownMenu({ isBoard }: Props) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-kbackground">
-        {isBoard && (
+        {type === 'Board' && (
           <Dialog>
             <DialogTrigger asChild>
               <DropdownMenuItem
@@ -46,10 +50,20 @@ function CustomDropdownMenu({ isBoard }: Props) {
           Edit
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">
-          <TrashIcon className=" size-4" />
-          Delete
-        </DropdownMenuItem>
+        <Dialog
+          open={open}
+          onOpenChange={() => {
+            setOpen(!open)
+          }}
+        >
+          <DialogTrigger asChild>
+            <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}>
+              <TrashIcon className=" size-4" />
+              Delete
+            </DropdownMenuItem>
+          </DialogTrigger>
+          <Delete type={type} deleted={deleted} openCallback={() => setOpen(!open)} />
+        </Dialog>
       </DropdownMenuContent>
     </DropdownMenu>
   )

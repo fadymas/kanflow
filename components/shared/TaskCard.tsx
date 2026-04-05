@@ -51,7 +51,7 @@ export default function TaskCard({ task, className }: TaskCardProps) {
             <DialogTitle className="text-lg font-bold text-foreground pr-8 line-clamp-3 text-ellipsis w-10/12">
               {task.title}
             </DialogTitle>
-            <CustomDropdownMenu />
+            <CustomDropdownMenu deleted={task.title} type="Task" />
           </div>
         </DialogHeader>
         <DialogDescription className="text-[14px] text-kdescription  line-clamp-3 text-ellipsis">

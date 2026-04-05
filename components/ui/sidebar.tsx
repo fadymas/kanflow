@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Eye } from 'lucide-react'
+import { Eye, EyeClosed } from 'lucide-react'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -244,7 +244,7 @@ function Sidebar({
 }
 
 function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state } = useSidebar()
 
   return (
     <Button
@@ -259,7 +259,11 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       }}
       {...props}
     >
-      <Eye className="size-4.5! text-knetural-default" size={18} />
+      {state === 'collapsed' ? (
+        <EyeClosed className="size-4.5! text-knetural-default" size={18} />
+      ) : (
+        <Eye className="size-4.5! text-knetural-default" size={18} />
+      )}
       <span>Hide Sidebar</span>
     </Button>
   )

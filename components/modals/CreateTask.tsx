@@ -25,7 +25,7 @@ function CreateTask() {
             <FieldLabel htmlFor="title" className="field-label">
               Title
             </FieldLabel>
-            <Input className="field-input" id="title" placeholder="Enter task" />
+            <Input className="field-input" id="title" placeholder="Enter task" name="title" />
           </Field>
           <Field>
             <FieldLabel htmlFor="description" className="field-label">
@@ -35,6 +35,7 @@ function CreateTask() {
               className="field-input resize-none max-h-29 h-29!"
               id="description"
               placeholder="Enter description for the task"
+              name="description"
             />
           </Field>
           <Field>
