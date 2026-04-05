@@ -1,34 +1,12 @@
 import Image from 'next/image'
 import { Button } from '../ui/button'
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
+import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import { Plus } from 'lucide-react'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog'
-import { EllipsisVertical, List, Plus } from 'lucide-react'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger
-} from '../ui/sheet'
 import MobileNavMenu from './MobileNavMenu'
+import CustomDropdownMenu from './CustomDropdown-menu'
+import CreateTask from '../modals/CreateTask'
 
 function Header() {
   return (
@@ -49,41 +27,15 @@ function Header() {
           <DialogTrigger asChild>
             <Button
               variant="ghost"
-              className="w-40 h-12 rounded-full px-6 py-3 gap-2 from-primary-300 to-primary-400 bg-linear-to-r text-white max-lg:w-1 max-lg:h-1 "
+              className="w-40 h-12 rounded-full px-6 py-3 gap-2 from-primary-300 to-primary-400 bg-linear-to-r text-white max-md:w-1 max-md:h-1 "
             >
               <Plus />
-              <span className="max-lg:hidden">Add New Task</span>
+              <span className="max-md:hidden">Add New Task</span>
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Are you absolutely sure?</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete your account and remove
-                your data from our servers.
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
+          <CreateTask />
         </Dialog>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="max-lg:hidden">
-              <EllipsisVertical size={18} className="size-4.5! text-knetural-default" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Billing</DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>Team</DropdownMenuItem>
-              <DropdownMenuItem>Subscription</DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <CustomDropdownMenu isBoard={true} />
       </div>
     </header>
   )

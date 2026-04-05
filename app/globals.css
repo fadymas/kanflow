@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@plugin 'lightswind/plugin';
 @import '../styles/tailwind.css';
 
 @theme {
@@ -77,5 +76,11 @@
   /* /typography */
   .modal-content {
     @apply lg:max-w-120 w-120 rounded-modal p-8;
+  }
+  .field-label {
+    @apply text-knetural-default text-[12px] font-bold;
+  }
+  .field-input {
+    @apply py-3 px-4 rounded-input h-11.5;
   }
 }

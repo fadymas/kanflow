@@ -7,17 +7,10 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { EllipsisVertical, PencilIcon, TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from '../ui/dropdown-menu'
 import { Task } from '@/mocks/task.model'
 import ShowTask from '../modals/showTask'
+import CustomDropdownMenu from './CustomDropdown-menu'
 
 interface TaskCardProps {
   task: Task
@@ -58,24 +51,7 @@ export default function TaskCard({ task, className }: TaskCardProps) {
             <DialogTitle className="text-lg font-bold text-foreground pr-8 line-clamp-3 text-ellipsis w-10/12">
               {task.title}
             </DialogTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="max-lg:hidden">
-                  <EllipsisVertical size={18} className="size-4.5! text-knetural-default" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-kbackground">
-                <DropdownMenuItem>
-                  <PencilIcon className="size-4" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  <TrashIcon className=" size-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <CustomDropdownMenu />
           </div>
         </DialogHeader>
         <DialogDescription className="text-[14px] text-kdescription  line-clamp-3 text-ellipsis">

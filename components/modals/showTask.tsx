@@ -21,7 +21,7 @@ export default function ShowTask({ subTasks }: { subTasks: Subtask[] }) {
           <Field
             key={subtask.id}
             orientation="horizontal"
-            className="gap-4  p-3 bg-ksubtle rounded-[1rem] max-w-full flex flex-nowrap"
+            className="gap-4  p-3 bg-ksubtle rounded-modal max-w-full flex flex-nowrap"
             role="none"
           >
             <Checkbox id="task-1" className=" rounded-xs size-4 " checked={subtask.isCompleted} />
@@ -39,7 +39,7 @@ export default function ShowTask({ subTasks }: { subTasks: Subtask[] }) {
         <Field orientation="horizontal">
           {/* compobox */}
           <Combobox items={columns} defaultValue={columns[0].name}>
-            <ComboboxInput className="w-full px-4 py-3 rounded-[1rem] h-11.5 bg-kpanal" />
+            <ComboboxInput className="w-full px-4 py-3 rounded-modal h-11.5 bg-kpanal" />
             <ComboboxContent>
               <ComboboxList>
                 {columns.map((column) => (

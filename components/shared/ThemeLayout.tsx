@@ -19,7 +19,10 @@ export default async function ThemeLayout({ children }: { children: React.ReactN
       <body className="min-h-screen k-background   ">
         <ThemeProvider theme={theme ?? 'light'}>
           <Header />
-          <SidebarProvider defaultOpen={sidebar_state === 'true'} className="">
+          <SidebarProvider
+            defaultOpen={sidebar_state === 'true'}
+            className="max-lg:min-h-[calc(100vh-73px)]"
+          >
             <CustomSidebar />
             {children}
           </SidebarProvider>

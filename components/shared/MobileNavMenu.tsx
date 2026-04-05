@@ -13,7 +13,7 @@ import { Fragment } from 'react/jsx-runtime'
 function MobileNavMenu() {
   return (
     <Select value={boards[0].name}>
-      <SelectTrigger className="border-none bg-kpanal! text-[18px] font-bold lg:hidden">
+      <SelectTrigger className="border-none bg-kpanal! text-[18px] font-bold md:hidden">
         <SelectValue />
         <SelectContent className="bg-kbackground px-2 text-[18px] font-bold py-2">
           <SelectGroup>

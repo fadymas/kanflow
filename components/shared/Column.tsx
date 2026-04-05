@@ -21,7 +21,7 @@ export default function Column({ title, tasks, isAddNew = false, color, classNam
           <Button
             variant="outline"
             className={cn(
-              'min-w-75 min-h-full dark:bg-[rgba(43,44,55,0.5)] bg-[rgba(214,227,249,0.4)] rounded-[1rem] flex flex-col items-center justify-center gap-4  ',
+              'min-w-75 min-h-full dark:bg-[rgba(43,44,55,0.5)] bg-[rgba(214,227,249,0.4)] rounded-modal flex flex-col items-center justify-center gap-4  ',
               className
             )}
           >

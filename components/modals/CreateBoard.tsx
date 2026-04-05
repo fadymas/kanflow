@@ -13,37 +13,24 @@ function CreateBoard() {
       <form action="">
         <FieldGroup>
           <Field className="gap-2">
-            <FieldLabel htmlFor="name" className="bold-12 text-knetural-default">
+            <FieldLabel htmlFor="name" className="field-lable">
               Board Name
             </FieldLabel>
-            <Input
-              id="name"
-              placeholder="Enter board name"
-              name="name"
-              className="py-3 px-4 rounded-input h-11.5"
-            />
+            <Input id="name" placeholder="Enter board name" name="name" className="field-input" />
           </Field>
           <Field>
-            <FieldLabel htmlFor="column-1" className="bold-12 text-knetural-default">
+            <FieldLabel htmlFor="column-1" className="field-label">
               Board Columns
             </FieldLabel>
             <div className="flex items-center mb-3">
-              <Input
-                id="column-1"
-                placeholder="Enter column name"
-                className="py-3 px-4 rounded-input h-11.5"
-              />
-              <Button variant="ghost">
+              <Input id="column-1" placeholder="Enter column name" className="field-input" />
+              <Button variant="ghost" type="button">
                 <XIcon />
               </Button>
             </div>
             <div className="flex items-center mb-3">
-              <Input
-                id="column-2"
-                placeholder="Enter column name"
-                className="py-3 px-4 rounded-input h-11.5"
-              />
-              <Button variant="ghost">
+              <Input id="column-2" placeholder="Enter column name" className="field-input" />
+              <Button variant="ghost" type="button">
                 <XIcon />
               </Button>
             </div>
