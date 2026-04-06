@@ -48,5 +48,4 @@ next-env.d.ts
 /.agents
 opencode.json
 mcp.json
-
 /lib/generated/prisma

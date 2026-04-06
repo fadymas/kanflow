@@ -84,3 +84,8 @@
     @apply py-3 px-4 rounded-input h-11.5;
   }
 }
+
+/* CLERK */
+div.cl-internal-1dauvpw {
+  display: none;
+}
