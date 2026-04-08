@@ -90,3 +90,16 @@ div.cl-internal-1dauvpw,
 .cl-internal-l2l775 {
   display: none;
 }
+
+.userButton .cl-userButton-root {
+  @apply size-20!;
+  & span {
+    @apply size-20!;
+  }
+  & button {
+    @apply size-20!;
+  }
+  & img {
+    @apply size-20!;
+  }
+}

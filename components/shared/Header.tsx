@@ -2,10 +2,10 @@ import Image from 'next/image'
 import { Button } from '../ui/button'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
-import MobileNavMenu from './MobileNavMenu'
+// import MobileNavMenu from './MobileNavMenu'
 import CustomDropdownMenu from './CustomDropdown-menu'
 import CreateTask from '../modals/CreateTask'
-import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
+import { Show, SignInButton, SignUpButton } from '@clerk/nextjs'
 
 async function Header() {
   return (
@@ -22,9 +22,9 @@ async function Header() {
         <h1 className="text-[24px] font-extrabold text-foreground max-xs:hidden ">
           Kan<span className="text-primary-DEFAULT">Flow</span>
         </h1>
-        <Show when="signed-in">
+        {/* <Show when="signed-in">
           <MobileNavMenu />
-        </Show>
+        </Show> */}
       </div>
       <div className="actions flex gap-6 items-center max-lg:gap-3">
         <Show when="signed-in">
@@ -40,7 +40,7 @@ async function Header() {
             </DialogTrigger>
             <CreateTask />
           </Dialog>
-          <UserButton />
+
           <CustomDropdownMenu deleted="boardnow" type="Board" />
         </Show>
         <Show when="signed-out">

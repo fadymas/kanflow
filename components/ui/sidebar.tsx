@@ -260,11 +260,11 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       {...props}
     >
       {state === 'collapsed' ? (
-        <EyeClosed className="size-4.5! text-knetural-default" size={18} />
+        <EyeClosed className="size-4.5! " size={18} />
       ) : (
-        <Eye className="size-4.5! text-knetural-default" size={18} />
+        <Eye className="size-4.5! " size={18} />
       )}
-      <span>Hide Sidebar</span>
+      <span className="max-md:hidden">Hide Sidebar</span>
     </Button>
   )
 }
