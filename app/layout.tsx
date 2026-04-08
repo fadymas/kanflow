@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { ClerkProvider } from '@clerk/nextjs'
-import {shadcn} from '@clerk/ui/themes'
+import { shadcn } from '@clerk/ui/themes'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import ThemeLayout from '@/components/shared/ThemeLayout'
 import './globals.css'
@@ -23,10 +23,15 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html suppressHydrationWarning lang="en" className={`${plusJakarta.variable}  `}>
+    <html
+      suppressHydrationWarning
+      lang="en"
+      className={`${plusJakarta.variable}  `}
+      data-scroll-behavior="smooth"
+    >
       <body className="min-h-screen k-background   ">
         <Suspense fallback={<div>Loading...</div>}>
-          <ClerkProvider  appearance={{theme:shadcn}}>
+          <ClerkProvider appearance={{ theme: shadcn }}>
             <ThemeLayout>{children}</ThemeLayout>
           </ClerkProvider>
         </Suspense>

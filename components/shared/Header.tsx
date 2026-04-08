@@ -1,17 +1,15 @@
 import Image from 'next/image'
 import { Button } from '../ui/button'
-
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
-
 import MobileNavMenu from './MobileNavMenu'
 import CustomDropdownMenu from './CustomDropdown-menu'
 import CreateTask from '../modals/CreateTask'
-import { Show, SignInButton, SignUpButton } from '@clerk/nextjs'
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 
-function Header() {
+async function Header() {
   return (
-    <header className="flex items-center justify-between  lg:px-8 lg:h-24  px-5 py-4 lg:py-0 k-panal border-b border-kborder">
+    <header className="flex items-center justify-between  lg:px-8 lg:h-24  px-2 py-4 lg:py-0 k-panal border-b border-kborder">
       <div className="logo flex justify-center items-center gap-3 ">
         <Image
           src="/logo.png"
@@ -42,6 +40,7 @@ function Header() {
             </DialogTrigger>
             <CreateTask />
           </Dialog>
+          <UserButton />
           <CustomDropdownMenu deleted="boardnow" type="Board" />
         </Show>
         <Show when="signed-out">
