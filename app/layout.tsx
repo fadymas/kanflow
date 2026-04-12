@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { ClerkProvider } from '@clerk/nextjs'
 import { shadcn } from '@clerk/ui/themes'
+import { ui } from '@clerk/ui'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import ThemeLayout from '@/components/shared/ThemeLayout'
 import './globals.css'
@@ -31,7 +32,7 @@ export default async function RootLayout({
     >
       <body className="min-h-screen k-background   ">
         <Suspense fallback={<div>Loading...</div>}>
-          <ClerkProvider appearance={{ theme: shadcn }}>
+          <ClerkProvider appearance={{ theme: shadcn }} ui={ui}>
             <ThemeLayout>{children}</ThemeLayout>
           </ClerkProvider>
         </Suspense>

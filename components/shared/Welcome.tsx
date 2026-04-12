@@ -1,12 +1,11 @@
 import { SignInButton, SignUpButton } from '@clerk/nextjs'
-import React from 'react'
 import { Button } from '../ui/button'
 import Image from 'next/image'
 
-function Welcome() {
+async function Welcome() {
   return (
     <div className="flex justify-center items-center w-full flex-col gap-4 ">
-      <Image width={96} height={86} src="/logo.png" alt="logo" />
+      <Image width={96} height={86} src="/logo.png" alt="logo" loading="eager" />
       <h2 className="font-extrabold text-[48px] text-foreground text-center">
         Welcome to <span className="text-primary-DEFAULT">KanFlow</span>
       </h2>

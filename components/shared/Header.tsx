@@ -17,7 +17,7 @@ async function Header() {
           loading="eager"
           width={46}
           height={46}
-          className="lg:w-11.5 lg:h-11.5 w-10"
+          className="lg:w-11.5 lg:h-11.5 w-10 h-10"
         />
         <h1 className="text-[24px] font-extrabold text-foreground max-xs:hidden ">
           Kan<span className="text-primary-DEFAULT">Flow</span>

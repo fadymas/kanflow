@@ -18,7 +18,7 @@ function Delete({ type, deleted, openCallback }: DeleteProps) {
   //     // Implement delete logic based on the type (board, column, task)
   //   }
   return (
-    <DialogContent className="bg-kpanal modal-content gap-8">
+    <DialogContent aria-describedby={undefined} className="bg-kpanal modal-content gap-8">
       <DialogHeader>
         <DialogTitle className="text-destructive bold-20">
           {type === 'Board' && `Delete "${deleted}" board?`}

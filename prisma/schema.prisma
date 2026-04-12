@@ -12,6 +12,7 @@ model Board {
   id         BigInt   @id @default(autoincrement())
   name       String   @db.VarChar
   created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
   ownerId    BigInt
   User       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   Column     Column[]
@@ -22,6 +23,7 @@ model Board {
 model Column {
   id         BigInt   @id @default(autoincrement())
   created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
   name       String?  @db.VarChar
   color      String?  @db.VarChar
   position   BigInt?
@@ -35,6 +37,7 @@ model Column {
 model SubTask {
   id          BigInt   @id @default(autoincrement())
   created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
   title       String?  @db.VarChar
   isCompleted Boolean  @default(false)
   taskId      BigInt?
@@ -46,6 +49,7 @@ model SubTask {
 model Task {
   id          BigInt    @id @default(autoincrement())
   created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
   title       String?   @db.VarChar
   description String?
   columnId    BigInt?

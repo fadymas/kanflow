@@ -45,7 +45,7 @@ export default function TaskCard({ task, className }: TaskCardProps) {
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent showCloseButton={false} className="modal-content bg-kpanal gap-5.75">
+      <DialogContent aria-describedby={undefined} showCloseButton={false} className="modal-content bg-kpanal gap-5.75">
         <DialogHeader>
           <div className="flex items-start justify-between gap-4">
             <DialogTitle className="text-lg font-bold text-foreground pr-8 line-clamp-3 text-ellipsis w-10/12">

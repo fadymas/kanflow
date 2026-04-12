@@ -4,6 +4,7 @@ CREATE TABLE "Board" (
     "name" VARCHAR NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "ownerId" BIGINT NOT NULL,
+    "updated_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Board_pkey" PRIMARY KEY ("id")
 );
@@ -16,6 +17,7 @@ CREATE TABLE "Column" (
     "color" VARCHAR,
     "position" BIGINT,
     "boardId" BIGINT,
+    "updated_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Column_pkey" PRIMARY KEY ("id")
 );
@@ -27,6 +29,7 @@ CREATE TABLE "SubTask" (
     "title" VARCHAR,
     "isCompleted" BOOLEAN NOT NULL DEFAULT false,
     "taskId" BIGINT,
+    "updated_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "SubTask_pkey" PRIMARY KEY ("id")
 );
@@ -39,6 +42,7 @@ CREATE TABLE "Task" (
     "description" TEXT,
     "columnId" BIGINT,
     "position" DECIMAL,
+    "updated_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
 );
@@ -51,8 +55,20 @@ CREATE TABLE "User" (
     "email" VARCHAR,
     "name" VARCHAR,
     "imageUrl" VARCHAR,
+    "clerkId" VARCHAR,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Color" (
+    "id" BIGSERIAL NOT NULL,
+    "name" VARCHAR,
+    "hex" VARCHAR,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Color_pkey" PRIMARY KEY ("id")
 );
 
 -- AddForeignKey

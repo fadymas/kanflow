@@ -244,7 +244,7 @@ function Sidebar({
 }
 
 function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar, state } = useSidebar()
+  const { toggleSidebar, state, isMobile } = useSidebar()
 
   return (
     <Button
@@ -259,7 +259,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       }}
       {...props}
     >
-      {state === 'collapsed' ? (
+      {state === 'collapsed' && !isMobile ? (
         <EyeClosed className="size-4.5! " size={18} />
       ) : (
         <Eye className="size-4.5! " size={18} />

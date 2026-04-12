@@ -37,7 +37,7 @@ function CustomSidebar() {
       <Sidebar collapsible="icon" className="relative border-r border-kborder py-8 h-full">
         {isMobile && (
           <SidebarHeader className="flex flex-row gap-3 items-center ml-5  mt-3 mb-5">
-            <Image src="/logo.png" width={40} height={40} alt="logo" />
+            <Image src="/logo.png" width={40} height={40} alt="logo" loading="eager" />
             <h2 className="text-[24px] font-extrabold text-foreground  ">
               Kan<span className="text-primary-DEFAULT">Flow</span>
             </h2>
@@ -101,7 +101,7 @@ function CustomSidebar() {
                     <div
                       className={cn(
                         `w-full flex justify-center h-20`,
-                        state === 'collapsed' ? '' : 'userButton'
+                        state === 'collapsed' && !isMobile ? '' : 'userButton'
                       )}
                     >
                       <UserButton />
