@@ -12,7 +12,7 @@
 
 # testing
 /coverage
-/mocks
+# /mocks
 *.png
 *.dio
 
