@@ -1,3 +1,4 @@
+'use client'
 import { cn } from '@/lib/utils'
 import TaskCard from './TaskCard'
 import { Plus } from 'lucide-react'
@@ -7,8 +8,10 @@ import { Task } from '@/mocks/task.model'
 import CreateColumn from '../modals/CreateColumn'
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu'
 import CustomMenuContent from './CustomMenuContent'
+import { Droppable } from '@hello-pangea/dnd'
 
 interface ColumnProps {
+  id?: string
   title?: string
   tasks?: Task[]
   isAddNew?: boolean
@@ -16,7 +19,14 @@ interface ColumnProps {
   className?: string
 }
 
-export default function Column({ title, tasks, isAddNew = false, color, className }: ColumnProps) {
+export default function Column({
+  id,
+  title,
+  tasks,
+  isAddNew = false,
+  color,
+  className
+}: ColumnProps) {
   if (isAddNew) {
     return (
       <Dialog>
@@ -49,11 +59,20 @@ export default function Column({ title, tasks, isAddNew = false, color, classNam
       </div>
       <ContextMenu>
         <ContextMenuTrigger className="h-full">
-          <div className="flex flex-col gap-6 h-full">
-            {tasks?.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </div>
+          <Droppable droppableId={id!} type="COLUMN">
+            {(provided, snapshot) => (
+              <div
+                className={`flex flex-col gap-6 h-full rounded-md  ${snapshot.isDraggingOver ? 'bg-kpanal/50' : ''}`}
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                {tasks?.map((task, index) => (
+                  <TaskCard key={task.id} task={task} index={index} />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </ContextMenuTrigger>
         <CustomMenuContent type="Column" deleted={title || 'Unnamed Column'} />
       </ContextMenu>

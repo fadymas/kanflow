@@ -1,7 +1,7 @@
 import { Task } from './task.model'
 
 export type Column = {
-  id: number
+  id: string
   name: string
   color: string
   position: number
@@ -10,7 +10,7 @@ export type Column = {
 
 export const columns: Column[] = [
   {
-    id: 1,
+    id: '1',
     name: 'To Do',
     color: '#FF5733',
     position: 1,
@@ -19,21 +19,50 @@ export const columns: Column[] = [
         id: '1',
         title: 'Design UI',
         description: 'Create initial layout',
-        columnId: 1,
+        columnId: '1',
         createdAt: '2026-04-02',
-        subtasks: [{ id: '1-1', title: 'Navbar', taskId: '1', isCompleted: true }]
+        subtasks: [{ id: '1-1', title: 'Navbar', taskId: '1', isCompleted: true }],
+        position: 1
+      },
+      {
+        id: '2',
+        title: ' UI',
+        description: 'Create initial layout',
+        columnId: '1',
+        createdAt: '2026-04-02',
+        subtasks: [{ id: '1-1', title: 'Navbar', taskId: '1', isCompleted: true }],
+        position: 2
       }
     ]
   },
   {
-    id: 2,
+    id: '2',
     name: 'In Progress',
     color: '#33C1FF',
     position: 2,
-    tasks: []
+    tasks: [
+      {
+        id: '3',
+        title: 'Design UI',
+        description: 'Create initial layout',
+        columnId: '2',
+        createdAt: '2026-04-02',
+        subtasks: [{ id: '1-1', title: 'Navbar', taskId: '1', isCompleted: true }],
+        position: 1
+      },
+      {
+        id: '4',
+        title: ' UI',
+        description: 'Create initial layout',
+        columnId: '2',
+        createdAt: '2026-04-02',
+        subtasks: [{ id: '1-1', title: 'Navbar', taskId: '1', isCompleted: true }],
+        position: 2
+      }
+    ]
   },
   {
-    id: 3,
+    id: '3',
     name: 'Done',
     color: '#75FF33',
     position: 3,
