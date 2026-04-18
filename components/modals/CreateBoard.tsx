@@ -10,8 +10,13 @@ import { Button } from '../ui/button'
 import { DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
 import { Input } from '../ui/input'
+import { useRouter } from 'next/navigation'
+import { useBoardStore } from '@/providers/board-store-provider'
 
-function CreateBoard() {
+function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
+  const router = useRouter()
+
+  const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
   const form = useForm<CreateBoardSchema>({
     resolver: zodResolver(createBoardSchema),
     defaultValues: {
@@ -27,14 +32,22 @@ function CreateBoard() {
 
   async function onSubmit(values: CreateBoardSchema) {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
         method: 'POST',
         body: JSON.stringify(values),
         headers: {
           Accept: 'application/json'
         }
       })
-      form.reset()
+
+      if (res.ok) {
+        const data = await res.json()
+
+        onSuccess()
+        form.reset()
+        setActiveBoard(data.board.id)
+        router.refresh()
+      }
       //toast
     } catch (error) {
       console.log(error)

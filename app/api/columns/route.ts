@@ -30,13 +30,14 @@ export async function GET(req: NextRequest) {
 
     const columns = await prisma.column.findMany({
       where: { boardId: BigInt(boardId) },
-      orderBy: { position: 'asc' },
-      include: {
-        Task: {
-          orderBy: { position: 'asc' },
-          include: { SubTask: true }
-        }
-      }
+      select: {
+        id: true,
+        name: true,
+        color: true,
+        position: true,
+        Task: { orderBy: { position: 'asc' }, include: { SubTask: true } }
+      },
+      orderBy: { position: 'asc' }
     })
 
     return NextResponse.json({ columns: sanitize(columns) }, { status: 200 })
@@ -58,10 +59,12 @@ export async function POST(req: NextRequest) {
       color: body.color ?? getRandomHexColor()
     })
     if (!parsed.success)
-      return NextResponse.json({ error: 'Invalid data', issues: parsed.error.flatten() }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Invalid data', issues: parsed.error.flatten() },
+        { status: 400 }
+      )
 
-    if (!body.boardId)
-      return NextResponse.json({ error: 'boardId is required' }, { status: 400 })
+    if (!body.boardId) return NextResponse.json({ error: 'boardId is required' }, { status: 400 })
 
     const board = await prisma.board.findFirst({
       where: { id: BigInt(body.boardId), ownerId: user.id }
@@ -97,8 +100,7 @@ export async function PATCH(req: NextRequest) {
     if (error) return error
 
     const body = await req.json()
-    if (!body.columnId)
-      return NextResponse.json({ error: 'columnId is required' }, { status: 400 })
+    if (!body.columnId) return NextResponse.json({ error: 'columnId is required' }, { status: 400 })
 
     const column = await prisma.column.findFirst({
       where: { id: BigInt(body.columnId) },
@@ -131,8 +133,7 @@ export async function DELETE(req: NextRequest) {
     if (error) return error
 
     const columnId = req.nextUrl.searchParams.get('columnId')
-    if (!columnId)
-      return NextResponse.json({ error: 'columnId is required' }, { status: 400 })
+    if (!columnId) return NextResponse.json({ error: 'columnId is required' }, { status: 400 })
 
     const column = await prisma.column.findFirst({
       where: { id: BigInt(columnId) },

@@ -58,11 +58,6 @@ export async function POST(req: NextRequest) {
             color: getRandomHexColor()
           }))
         }
-      },
-      include: {
-        Column: {
-          orderBy: { position: 'asc' }
-        }
       }
     })
 

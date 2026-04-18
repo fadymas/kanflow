@@ -23,11 +23,12 @@ import { ClerkLoaded, ClerkLoading, UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useBoardStore } from '@/providers/board-store-provider'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 function CustomSidebar({ boards }: { boards: string }) {
   const parsedBoards = JSON.parse(boards)
   const { state, isMobile, setOpenMobile } = useSidebar()
+  const [open, setOpen] = useState(false)
 
   const activeBoardId = useBoardStore((state) => state.activeBoardId)
   const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
@@ -35,8 +36,7 @@ function CustomSidebar({ boards }: { boards: string }) {
   useEffect(() => {
     if (parsedBoards.length === 0) return
 
-    const boardExists = parsedBoards.some((b: Board) => b.id === activeBoardId)
-    if (!activeBoardId || !boardExists) {
+    if (!activeBoardId) {
       setActiveBoardId(parsedBoards[0].id)
     }
   }, [activeBoardId, parsedBoards, setActiveBoardId])
@@ -81,14 +81,14 @@ function CustomSidebar({ boards }: { boards: string }) {
               ))}
 
               <SidebarMenuItem className="flex items-center">
-                <Dialog>
+                <Dialog open={open} onOpenChange={setOpen}>
                   <DialogTrigger asChild>
                     <SidebarMenuButton className="flex  items-center w-60.75! h-14 px-8   rounded-r-full  cursor-pointer gap-4 py-0 text-primary-DEFAULT transition-colors font-bold text-[16px]">
                       <Plus className="size-4.5!" />
                       <span>Create New Board</span>
                     </SidebarMenuButton>
                   </DialogTrigger>
-                  <CreateBoard />
+                  <CreateBoard onSuccess={() => setOpen(false)} />
                 </Dialog>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -14,7 +14,6 @@ function Board() {
         .then((data) => data.columns ?? []),
     enabled: !!activeBoardId
   })
-  console.log(columns)
 
   function onDragEnd(result: DropResult) {
     // optimistic reorder logic here later
