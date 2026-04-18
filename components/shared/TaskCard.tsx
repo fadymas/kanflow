@@ -8,10 +8,10 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Task } from '@/mocks/task.model'
 import ShowTask from '../modals/showTask'
-import CustomDropdownMenu from './CustomDropdown-menu'
+import CustomDropdownMenu from './CustomDropdownMenu'
 import { Draggable } from '@hello-pangea/dnd'
+import { Task } from '@/mocks/task.model'
 
 interface TaskCardProps {
   index: number

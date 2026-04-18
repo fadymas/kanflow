@@ -4,7 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { shadcn } from '@clerk/ui/themes'
 import { ui } from '@clerk/ui'
 import { Plus_Jakarta_Sans } from 'next/font/google'
-import ThemeLayout from '@/components/shared/ThemeLayout'
+import ThemeLayout from '@/components/layout/ThemeLayout'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -25,14 +25,14 @@ export default async function RootLayout({
 }>) {
   return (
     <html
-      suppressHydrationWarning
       lang="en"
-      className={`${plusJakarta.variable}  `}
+      className={`${plusJakarta.variable}`}
       data-scroll-behavior="smooth"
+      suppressHydrationWarning
     >
-      <body className="min-h-screen k-background   ">
+      <body className="min-h-screen k-background">
         <Suspense fallback={<div>Loading...</div>}>
-          <ClerkProvider appearance={{ theme: shadcn }} ui={ui}>
+          <ClerkProvider appearance={shadcn} ui={ui}>
             <ThemeLayout>{children}</ThemeLayout>
           </ClerkProvider>
         </Suspense>

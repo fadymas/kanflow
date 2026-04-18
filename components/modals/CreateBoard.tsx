@@ -25,8 +25,20 @@ function CreateBoard() {
     name: 'columns'
   })
 
-  function onSubmit(values: CreateBoardSchema) {
-    console.log(values)
+  async function onSubmit(values: CreateBoardSchema) {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
+        method: 'POST',
+        body: JSON.stringify(values),
+        headers: {
+          Accept: 'application/json'
+        }
+      })
+      form.reset()
+      //toast
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (

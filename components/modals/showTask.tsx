@@ -1,6 +1,6 @@
 'use client'
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
-import { Checkbox } from '../lightswind/checkbox'
+import { Checkbox } from '../vendor/lightswind/checkbox'
 import {
   Combobox,
   ComboboxContent,

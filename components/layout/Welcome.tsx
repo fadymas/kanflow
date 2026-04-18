@@ -1,5 +1,5 @@
 import { SignInButton, SignUpButton } from '@clerk/nextjs'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 
 async function Welcome() {

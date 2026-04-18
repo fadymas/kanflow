@@ -1,6 +1,4 @@
 'use client'
-
-import { useState } from 'react'
 import SidebarItem from '../../public/icons/sidebar-item.svg'
 import {
   Sidebar,
@@ -18,16 +16,30 @@ import {
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 
-import SwitchDualIconLabelDemo from '../shadcn-studio/switch/switch-11'
-import { Board, boards } from '@/mocks/board.model'
+import SwitchDualIconLabelDemo from '../vendor/shadcn-studio/switch/switch-11'
+import { Board } from '@/mocks/board.model'
 import CreateBoard from '../modals/CreateBoard'
-import { UserButton } from '@clerk/nextjs'
+import { ClerkLoaded, ClerkLoading, UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import { useBoardStore } from '@/providers/board-store-provider'
+import { useEffect } from 'react'
 
-function CustomSidebar() {
-  const [isActive, setIsActive] = useState('Platform Launch')
-  const { state, isMobile } = useSidebar()
+function CustomSidebar({ boards }: { boards: string }) {
+  const parsedBoards = JSON.parse(boards)
+  const { state, isMobile, setOpenMobile } = useSidebar()
+
+  const activeBoardId = useBoardStore((state) => state.activeBoardId)
+  const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
+
+  useEffect(() => {
+    if (parsedBoards.length === 0) return
+
+    const boardExists = parsedBoards.some((b: Board) => b.id === activeBoardId)
+    if (!activeBoardId || !boardExists) {
+      setActiveBoardId(parsedBoards[0].id)
+    }
+  }, [activeBoardId, parsedBoards, setActiveBoardId])
   return (
     <>
       {isMobile && (
@@ -47,16 +59,19 @@ function CustomSidebar() {
         <SidebarContent className={cn('justify-between ', isMobile ? 'pb-5' : '')}>
           <SidebarGroup className="p-0">
             <SidebarGroupLabel className="mb-4 px-8 text-[12px] font-bold tracking-[2.4px] text-knetural-default">
-              {`ALL BOARDS (${boards.length})`}
+              {`ALL BOARDS (${parsedBoards.length})`}
             </SidebarGroupLabel>
 
-            <SidebarMenu className="gap-2 ">
-              {boards.map((board: Board) => (
+            <SidebarMenu className="gap-2  mb-5">
+              {parsedBoards.map((board: Board) => (
                 <SidebarMenuItem key={board.id} className="flex items-center">
                   <SidebarMenuButton
                     className=" flex  items-center w-60.75! h-14 px-8   rounded-r-full  cursor-pointer gap-4 py-0 text-knetural-default transition-colors data-[active=true]:bg-primary-DEFAULT data-[active=true]:text-white font-bold text-[16px] "
-                    isActive={isActive === board.name}
-                    onClick={() => setIsActive(board.name)}
+                    isActive={activeBoardId === board.id}
+                    onClick={() => {
+                      setActiveBoardId(board.id)
+                      setOpenMobile(false)
+                    }}
                   >
                     <SidebarItem className="size-4.5!" />
 
@@ -104,7 +119,12 @@ function CustomSidebar() {
                         state === 'collapsed' && !isMobile ? '' : 'userButton'
                       )}
                     >
-                      <UserButton />
+                      <ClerkLoading>
+                        <p>Clerk is loading...</p>
+                      </ClerkLoading>
+                      <ClerkLoaded>
+                        <UserButton />
+                      </ClerkLoaded>
                     </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

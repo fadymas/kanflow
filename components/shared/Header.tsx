@@ -3,7 +3,7 @@ import { Button } from '../ui/button'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 // import MobileNavMenu from './MobileNavMenu'
-import CustomDropdownMenu from './CustomDropdown-menu'
+import CustomDropdownMenu from './CustomDropdownMenu'
 import CreateTask from '../modals/CreateTask'
 import { Show, SignInButton, SignUpButton } from '@clerk/nextjs'
 
@@ -17,7 +17,7 @@ async function Header() {
           loading="eager"
           width={46}
           height={46}
-          className="lg:w-11.5 lg:h-11.5 w-10 h-10"
+          className="w-10 h-auto lg:w-11.5"
         />
         <h1 className="text-[24px] font-extrabold text-foreground max-xs:hidden ">
           Kan<span className="text-primary-DEFAULT">Flow</span>

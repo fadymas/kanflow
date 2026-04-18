@@ -4,11 +4,11 @@ import TaskCard from './TaskCard'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
-import { Task } from '@/mocks/task.model'
 import CreateColumn from '../modals/CreateColumn'
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu'
 import CustomMenuContent from './CustomMenuContent'
 import { Droppable } from '@hello-pangea/dnd'
+import { Task } from '@/mocks/task.model'
 
 interface ColumnProps {
   id?: string
@@ -54,7 +54,7 @@ export default function Column({
       <div className="flex items-center gap-3">
         <div className={`w-4 min-h-full rounded-full ring`} style={{ backgroundColor: color }} />
         <h3 className="text-[12px] font-bold text-knetural-default tracking-[0.2em]">
-          {title?.toUpperCase()} ({tasks?.length})
+          {title?.toUpperCase()} ({tasks?.length || 0})
         </h3>
       </div>
       <ContextMenu>

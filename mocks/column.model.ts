@@ -1,6 +1,6 @@
 import { Task } from './task.model'
 
-export type Column = {
+export type Columndb = {
   id: string
   name: string
   color: string
@@ -8,7 +8,7 @@ export type Column = {
   tasks: Task[]
 }
 
-export const columns: Column[] = [
+export const columns: Columndb[] = [
   {
     id: '1',
     name: 'To Do',
