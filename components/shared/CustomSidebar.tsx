@@ -111,7 +111,7 @@ function CustomSidebar({ boards }: { boards: string }) {
                   </SidebarMenuItem>
                 )}
 
-                <SidebarMenuItem>
+                {/* <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <div
                       className={cn(
@@ -127,7 +127,7 @@ function CustomSidebar({ boards }: { boards: string }) {
                       </ClerkLoaded>
                     </div>
                   </SidebarMenuButton>
-                </SidebarMenuItem>
+                </SidebarMenuItem> */}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

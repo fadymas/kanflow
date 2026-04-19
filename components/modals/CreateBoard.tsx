@@ -25,6 +25,8 @@ function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
     }
   })
 
+  const { isSubmitting } = form.formState
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'columns'
@@ -42,7 +44,6 @@ function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
 
       if (res.ok) {
         const data = await res.json()
-
         onSuccess()
         form.reset()
         setActiveBoard(data.board.id)
@@ -76,6 +77,7 @@ function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
                   placeholder="Enter board name"
                   aria-invalid={fieldState.invalid}
                   autoComplete="off"
+                  disabled={isSubmitting}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -102,6 +104,7 @@ function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
                           className="field-input"
                           placeholder="Enter column name"
                           aria-invalid={fieldState.invalid}
+                          disabled={isSubmitting}
                         />
                         <Button
                           variant="ghost"
@@ -123,6 +126,7 @@ function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
             <Button
               type="button"
               onClick={() => append({ name: '' })}
+              disabled={isSubmitting}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-neutral-900 text-ksecondary bold-14 dark:bg-white"
             >
               <Plus data-icon="inline-start" />
@@ -133,9 +137,10 @@ function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
 
         <Button
           type="submit"
+          disabled={isSubmitting}
           className="mt-6 h-13 w-full rounded-full bg-ksecondary p-4 text-white bold-14"
         >
-          Create New Board
+          {isSubmitting ? 'Creating...' : 'Create New Board'}
         </Button>
       </form>
     </DialogContent>

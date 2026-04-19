@@ -1,11 +1,9 @@
 import Image from 'next/image'
 import { Button } from '../ui/button'
-import { Dialog, DialogTrigger } from '@/components/ui/dialog'
-import { Plus } from 'lucide-react'
 // import MobileNavMenu from './MobileNavMenu'
 import CustomDropdownMenu from './CustomDropdownMenu'
-import CreateTask from '../modals/CreateTask'
 import { Show, SignInButton, SignUpButton } from '@clerk/nextjs'
+import CreateTask from '../modals/CreateTask'
 
 async function Header() {
   return (
@@ -28,18 +26,7 @@ async function Header() {
       </div>
       <div className="actions flex gap-6 items-center max-lg:gap-3">
         <Show when="signed-in">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-40 h-12 rounded-full px-6 py-3 gap-2 from-primary-300 to-primary-400 bg-linear-to-r text-white max-md:w-1 max-md:h-1 "
-              >
-                <Plus />
-                <span className="max-md:hidden">Add New Task</span>
-              </Button>
-            </DialogTrigger>
-            <CreateTask />
-          </Dialog>
+          <CreateTask />
 
           <CustomDropdownMenu deleted="boardnow" type="Board" />
         </Show>

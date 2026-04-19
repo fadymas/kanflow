@@ -66,8 +66,8 @@ export default function Column({
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                {tasks?.map((task, index) => (
-                  <TaskCard key={task.id} task={task} index={index} />
+                {tasks?.map((task) => (
+                  <TaskCard key={task.id} task={task} index={Number(task.position)} />
                 ))}
                 {provided.placeholder}
               </div>

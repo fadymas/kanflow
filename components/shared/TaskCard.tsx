@@ -20,10 +20,10 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ index, task, className }: TaskCardProps) {
-  const completedSubtasks = task.subtasks.filter((subtask) => subtask.isCompleted).length
+  const completedSubtasks = task.SubTask.filter((subtask) => subtask.isCompleted).length
 
   return (
-    <Draggable draggableId={task.id} index={index} disableInteractiveElementBlocking>
+    <Draggable draggableId={String(task.id)} index={index} disableInteractiveElementBlocking>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
@@ -54,9 +54,9 @@ export default function TaskCard({ index, task, className }: TaskCardProps) {
                 >
                   {task.title}
                 </h4>
-                {task.subtasks && (
+                {task.SubTask && (
                   <p className="text-[12px] font-bold text-knetural-default">
-                    {completedSubtasks} of {task.subtasks.length} subtasks
+                    {completedSubtasks} of {task.SubTask.length} subtasks
                   </p>
                 )}
               </Button>
@@ -79,7 +79,7 @@ export default function TaskCard({ index, task, className }: TaskCardProps) {
                 the market and see what the competition is doing and if their pricing model helps us
                 in any way.
               </DialogDescription>
-              <ShowTask subTasks={task.subtasks} />
+              <ShowTask subTasks={task.SubTask} />
             </DialogContent>
           </Dialog>
         </div>

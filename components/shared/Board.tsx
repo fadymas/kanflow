@@ -6,15 +6,22 @@ import { Columndb } from '@/mocks/column.model'
 import { useQuery } from '@tanstack/react-query'
 function Board() {
   const activeBoardId = useBoardStore((s) => s.activeBoardId)
+  const setColumns = useBoardStore((s) => s.setColumns)
+
   const { data: columns = [], isLoading } = useQuery({
     queryKey: ['columns', activeBoardId],
     queryFn: () =>
-      fetch(`/api/columns?boardId=${activeBoardId}`)
+      fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns?boardId=${activeBoardId}`)
         .then((res) => res.json())
-        .then((data) => data.columns ?? []),
+        .then((data) => {
+          const cols = data.columns ?? []
+          setColumns(cols) // save to store
+          return cols
+        }),
     enabled: !!activeBoardId
   })
 
+  console.log(columns)
   function onDragEnd(result: DropResult) {
     // optimistic reorder logic here later
     console.log(result)
@@ -33,7 +40,7 @@ function Board() {
             id={String(column.id)}
             title={column.name}
             color={column.color}
-            tasks={column.tasks}
+            tasks={column.Task}
           />
         ))}
       </DragDropContext>

@@ -3,7 +3,7 @@ export interface Task {
   title: string
   description?: string
   columnId: string
-  subtasks: Subtask[]
+  SubTask: Subtask[]
   createdAt: string
   position: number
 }
@@ -22,7 +22,7 @@ export const tasks: Task[] = [
     description: 'Create initial layout',
     columnId: '1',
     createdAt: '2026-04-02',
-    subtasks: [
+    SubTask: [
       { id: '1-1', title: 'Navbar', taskId: '1', isCompleted: true },
       { id: '1-2', title: 'Sidebar', taskId: '1', isCompleted: false }
     ],

@@ -52,28 +52,25 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
 
     // Resolve column by name or id
-    if (!body.columnId && !body.columnName)
-      return NextResponse.json({ error: 'columnId or columnName is required' }, { status: 400 })
+    if (!body.column) return NextResponse.json({ error: 'column required' }, { status: 400 })
 
     const parsed = createTaskSchema.safeParse({
       title: body.title,
       description: body.description ?? '',
       subtasks: body.subtasks ?? [],
-      column: body.columnName ?? String(body.columnId)
+      column: body.column
     })
     if (!parsed.success)
-      return NextResponse.json({ error: 'Invalid data', issues: parsed.error.flatten() }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Invalid data', issues: parsed.error.flatten() },
+        { status: 400 }
+      )
 
     // Find column — support lookup by id or by name within a board
-    const column = body.columnId
-      ? await prisma.column.findFirst({
-          where: { id: BigInt(body.columnId) },
-          include: { Board: true }
-        })
-      : await prisma.column.findFirst({
-          where: { name: body.columnName, Board: { ownerId: user.id } },
-          include: { Board: true }
-        })
+    const column = await prisma.column.findFirst({
+      where: { id: BigInt(body.column) },
+      include: { Board: true }
+    })
 
     if (!column || column.Board?.ownerId !== user.id)
       return NextResponse.json({ error: 'Column not found' }, { status: 404 })
@@ -112,8 +109,7 @@ export async function PATCH(req: NextRequest) {
     if (error) return error
 
     const body = await req.json()
-    if (!body.taskId)
-      return NextResponse.json({ error: 'taskId is required' }, { status: 400 })
+    if (!body.taskId) return NextResponse.json({ error: 'taskId is required' }, { status: 400 })
 
     const task = await prisma.task.findFirst({
       where: { id: BigInt(body.taskId) },
@@ -160,8 +156,7 @@ export async function DELETE(req: NextRequest) {
     if (error) return error
 
     const taskId = req.nextUrl.searchParams.get('taskId')
-    if (!taskId)
-      return NextResponse.json({ error: 'taskId is required' }, { status: 400 })
+    if (!taskId) return NextResponse.json({ error: 'taskId is required' }, { status: 400 })
 
     const task = await prisma.task.findFirst({
       where: { id: BigInt(taskId) },

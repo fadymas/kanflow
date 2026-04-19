@@ -186,7 +186,7 @@
     @apply box-border scroll-smooth p-0 m-0;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground pointer-events-auto!;
   }
   html {
     @apply font-plus-jakarta-sans;

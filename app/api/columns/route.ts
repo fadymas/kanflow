@@ -40,7 +40,11 @@ export async function GET(req: NextRequest) {
       orderBy: { position: 'asc' }
     })
 
-    return NextResponse.json({ columns: sanitize(columns) }, { status: 200 })
+    const safeColumns = JSON.parse(
+      JSON.stringify(columns, (_, value) => (typeof value === 'bigint' ? Number(value) : value))
+    )
+
+    return NextResponse.json({ columns: safeColumns }, { status: 200 })
   } catch (error) {
     console.error('Failed to fetch columns:', error)
     return NextResponse.json({ error: 'Failed to fetch columns' }, { status: 500 })
