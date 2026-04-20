@@ -4,10 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Sketch } from '@uiw/react-color'
 import { Pipette } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { colors } from '@/mocks/color.model'
 import { createColumnSchema, type CreateColumnSchema } from '@/lib/validation'
 import { cn } from '@/lib/utils'
+import { useBoardStore } from '@/providers/board-store-provider'
 
 import { Button } from '../ui/button'
 import { DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
@@ -16,7 +18,10 @@ import { Input } from '../ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group'
 
-function CreateColumn() {
+function CreateColumnDialog({ onSuccess }: { onSuccess?: () => void }) {
+  const activeBoardId = useBoardStore((state) => state.activeBoard?.id)
+  const queryClient = useQueryClient()
+
   const form = useForm<CreateColumnSchema>({
     resolver: zodResolver(createColumnSchema),
     defaultValues: {
@@ -25,8 +30,24 @@ function CreateColumn() {
     }
   })
 
-  function onSubmit(values: CreateColumnSchema) {
-    console.log(values)
+  const { isSubmitting } = form.formState
+
+  async function onSubmit(values: CreateColumnSchema) {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns`, {
+        method: 'POST',
+        body: JSON.stringify({ ...values, boardId: activeBoardId }),
+        headers: { Accept: 'application/json' }
+      })
+
+      if (res.ok) {
+        form.reset()
+        onSuccess?.()
+        queryClient.invalidateQueries({ queryKey: ['columns'] })
+      }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
@@ -51,6 +72,7 @@ function CreateColumn() {
                   placeholder="Enter column name"
                   aria-invalid={fieldState.invalid}
                   autoComplete="off"
+                  disabled={isSubmitting}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -115,9 +137,10 @@ function CreateColumn() {
 
           <Button
             type="submit"
+            disabled={isSubmitting}
             className="mt-6 h-13 w-full rounded-full bg-ksecondary p-4 text-white bold-14"
           >
-            Create New Column
+            {isSubmitting ? 'Creating...' : 'Create New Column'}
           </Button>
         </FieldGroup>
       </form>
@@ -125,4 +148,4 @@ function CreateColumn() {
   )
 }
 
-export default CreateColumn
+export default CreateColumnDialog

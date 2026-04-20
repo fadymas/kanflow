@@ -4,11 +4,12 @@ import TaskCard from './TaskCard'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
-import CreateColumn from '../modals/CreateColumn'
+import CreateColumn from '../modals/CreateColumnDialog'
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu'
 import CustomMenuContent from './CustomMenuContent'
 import { Droppable } from '@hello-pangea/dnd'
 import { Task } from '@/mocks/task.model'
+import { useState } from 'react'
 
 interface ColumnProps {
   id?: string
@@ -27,9 +28,10 @@ export default function Column({
   color,
   className
 }: ColumnProps) {
+  const [open, setOpen] = useState(false)
   if (isAddNew) {
     return (
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
             variant="outline"
@@ -44,7 +46,7 @@ export default function Column({
             </span>
           </Button>
         </DialogTrigger>
-        <CreateColumn />
+        <CreateColumn onSuccess={() => setOpen(false)} />
       </Dialog>
     )
   }
@@ -53,13 +55,18 @@ export default function Column({
     <div className={cn('flex flex-col gap-6 max-w-75 min-w-75 w-75 min-h-full', className)}>
       <div className="flex items-center gap-3">
         <div className={`w-4 min-h-full rounded-full ring`} style={{ backgroundColor: color }} />
-        <h3 className="text-[12px] font-bold text-knetural-default tracking-[0.2em]">
-          {title?.toUpperCase()} ({tasks?.length || 0})
-        </h3>
+        <div className="flex">
+          <h3 className="text-[12px] font-bold text-knetural-default tracking-[0.2em] line-clamp-1 max-w-37.5">
+            {title?.toUpperCase()}
+          </h3>
+          <h3 className="text-[12px] font-bold text-knetural-default tracking-[0.2em]">
+            ({tasks?.length || 0})
+          </h3>
+        </div>
       </div>
       <ContextMenu>
         <ContextMenuTrigger className="h-full">
-          <Droppable droppableId={id!} type="COLUMN">
+          <Droppable droppableId={String(id!)} type="COLUMN">
             {(provided, snapshot) => (
               <div
                 className={`flex flex-col gap-6 h-full rounded-md  ${snapshot.isDraggingOver ? 'bg-kpanal/50' : ''}`}
@@ -74,7 +81,7 @@ export default function Column({
             )}
           </Droppable>
         </ContextMenuTrigger>
-        <CustomMenuContent type="Column" deleted={title || 'Unnamed Column'} />
+        <CustomMenuContent type="Column" id={Number(id)} deleted={title || 'Unnamed Column'} />
       </ContextMenu>
     </div>
   )

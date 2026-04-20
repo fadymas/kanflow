@@ -1,22 +1,27 @@
 import { createStore } from 'zustand/vanilla'
 import { persist } from 'zustand/middleware'
 import { Columndb } from '@/mocks/column.model'
+import { Board } from '@/mocks/board.model'
 
 export type BoardState = {
-  activeBoardId: number | null
+  activeBoard: { name: string; id: number } | null
   columns: Columndb[]
+  boards: Pick<Board, 'id' | 'name'>[]
 }
 
 export type BoardActions = {
-  setActiveBoard: (boardId: number) => void
+  setActiveBoard: (boardId: number, name: string) => void
+  clearActiveBoard: () => void
   setColumns: (columns: Columndb[]) => void
+  setBoards: (boards: Pick<Board, 'id' | 'name'>[]) => void
 }
 
 export type BoardStore = BoardState & BoardActions
 
 export const defaultInitState: BoardState = {
-  activeBoardId: null,
-  columns: []
+  activeBoard: null,
+  columns: [],
+  boards: []
 }
 
 export const createBoardStore = (initState: BoardState = defaultInitState) => {
@@ -24,12 +29,14 @@ export const createBoardStore = (initState: BoardState = defaultInitState) => {
     persist(
       (set) => ({
         ...initState,
-        setActiveBoard: (boardId) => set({ activeBoardId: boardId }),
-        setColumns: (columns) => set({ columns })
+        setActiveBoard: (boardId, name) => set({ activeBoard: { id: boardId, name: name } }),
+        clearActiveBoard: () => set({ activeBoard: null, columns: [] }),
+        setColumns: (columns) => set({ columns }),
+        setBoards: (boards) => set({ boards })
       }),
       {
         name: 'active-board',
-        partialize: (state) => ({ activeBoardId: state.activeBoardId }) // only persist activeBoardId, not columns
+        partialize: (state) => ({ activeBoard: state.activeBoard }) // only persist activeBoard, not columns or boards
       }
     )
   )

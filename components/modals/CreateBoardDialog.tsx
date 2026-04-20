@@ -13,7 +13,7 @@ import { Input } from '../ui/input'
 import { useRouter } from 'next/navigation'
 import { useBoardStore } from '@/providers/board-store-provider'
 
-function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
+function CreateBoardDialog({ onSuccess }: { onSuccess: () => void }) {
   const router = useRouter()
 
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
@@ -46,7 +46,7 @@ function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
         const data = await res.json()
         onSuccess()
         form.reset()
-        setActiveBoard(data.board.id)
+        setActiveBoard(data.board.id, data.board.name)
         router.refresh()
       }
       //toast
@@ -147,4 +147,4 @@ function CreateBoard({ onSuccess }: { onSuccess: () => void }) {
   )
 }
 
-export default CreateBoard
+export default CreateBoardDialog

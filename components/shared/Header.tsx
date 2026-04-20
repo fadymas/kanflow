@@ -3,7 +3,7 @@ import { Button } from '../ui/button'
 // import MobileNavMenu from './MobileNavMenu'
 import CustomDropdownMenu from './CustomDropdownMenu'
 import { Show, SignInButton, SignUpButton } from '@clerk/nextjs'
-import CreateTask from '../modals/CreateTask'
+import CreateTask from '../modals/CreateTaskDialog'
 
 async function Header() {
   return (
@@ -28,7 +28,7 @@ async function Header() {
         <Show when="signed-in">
           <CreateTask />
 
-          <CustomDropdownMenu deleted="boardnow" type="Board" />
+          <CustomDropdownMenu type="Board" />
         </Show>
         <Show when="signed-out">
           <div className="flex gap-6 items-center justify-center">

@@ -5,29 +5,32 @@ import { useBoardStore } from '@/providers/board-store-provider'
 import { Columndb } from '@/mocks/column.model'
 import { useQuery } from '@tanstack/react-query'
 function Board() {
-  const activeBoardId = useBoardStore((s) => s.activeBoardId)
+  const activeBoard = useBoardStore((s) => s.activeBoard)
   const setColumns = useBoardStore((s) => s.setColumns)
 
-  const { data: columns = [], isLoading } = useQuery({
-    queryKey: ['columns', activeBoardId],
+  const {
+    data: columns = [],
+    isLoading,
+    status
+  } = useQuery({
+    queryKey: ['columns', activeBoard],
     queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns?boardId=${activeBoardId}`)
+      fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns?boardId=${activeBoard?.id}`)
         .then((res) => res.json())
         .then((data) => {
           const cols = data.columns ?? []
           setColumns(cols) // save to store
           return cols
         }),
-    enabled: !!activeBoardId
+    enabled: !!activeBoard
   })
 
-  console.log(columns)
   function onDragEnd(result: DropResult) {
     // optimistic reorder logic here later
     console.log(result)
   }
 
-  if (isLoading) {
+  if (status === 'pending' || isLoading) {
     return <div>Loading....</div>
   }
 
@@ -37,7 +40,7 @@ function Board() {
         {columns.map((column: Columndb) => (
           <Column
             key={column.id}
-            id={String(column.id)}
+            id={column.id}
             title={column.name}
             color={column.color}
             tasks={column.Task}

@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
-import CreateBoard from '../modals/CreateBoard'
-import Delete from '../modals/Delete'
+import CreateBoard from '../modals/CreateBoardDialog'
 import { Button } from '../ui/button'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import {
@@ -12,14 +11,21 @@ import {
   DropdownMenuSeparator
 } from '../ui/dropdown-menu'
 import { EllipsisVertical, PencilIcon, Plus, TrashIcon } from 'lucide-react'
+import { useBoardStore } from '@/providers/board-store-provider'
+import DeleteDialog from '../modals/DeleteDialog'
 
 interface Props {
   type: 'Board' | 'Task'
-  deleted: string
+  id?: number
+  deleted?: string
 }
 
-function CustomDropdownMenu({ type, deleted }: Props) {
+function CustomDropdownMenu({ type, id, deleted }: Props) {
   const [open, setOpen] = useState(false)
+  const [openAddBoard, setOpenAddBoard] = useState(false)
+
+  const activeBoard = useBoardStore((state) => state.activeBoard)
+
   return (
     <>
       <DropdownMenu>
@@ -30,7 +36,7 @@ function CustomDropdownMenu({ type, deleted }: Props) {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-kbackground">
           {type === 'Board' && (
-            <Dialog>
+            <Dialog open={openAddBoard} onOpenChange={setOpenAddBoard}>
               <DialogTrigger asChild>
                 <DropdownMenuItem
                   className="text-primary-DEFAULT md:hidden"
@@ -42,7 +48,7 @@ function CustomDropdownMenu({ type, deleted }: Props) {
                   Add Board
                 </DropdownMenuItem>
               </DialogTrigger>
-              <CreateBoard />
+              <CreateBoard onSuccess={() => setOpen(false)} />
             </Dialog>
           )}
 
@@ -64,7 +70,12 @@ function CustomDropdownMenu({ type, deleted }: Props) {
           setOpen(!open)
         }}
       >
-        <Delete type={type} deleted={deleted} openCallback={() => setOpen(!open)} />
+        <DeleteDialog
+          type={type}
+          id={id ? id : activeBoard?.id}
+          deleted={deleted ? deleted : activeBoard?.name}
+          openCallback={() => setOpen(!open)}
+        />
       </Dialog>
     </>
   )

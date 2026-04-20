@@ -1,3 +1,10 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { useBoardStore } from '@/providers/board-store-provider'
+
 import {
   DialogContent,
   DialogDescription,
@@ -9,14 +16,50 @@ import { Button } from '../ui/button'
 
 interface DeleteProps {
   type: 'Task' | 'Board' | 'Column'
-  deleted: string
+  id?: number
+  deleted?: string
   openCallback: () => void
 }
 
-function Delete({ type, deleted, openCallback }: DeleteProps) {
-  //   function handleDelete() {
-  //     // Implement delete logic based on the type (board, column, task)
-  //   }
+function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
+  const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const clearActiveBoard = useBoardStore((state) => state.clearActiveBoard)
+  const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
+  const boards = useBoardStore((state) => state.boards)
+
+  async function handleDelete() {
+    setIsDeleting(true)
+    try {
+      const urlMap = {
+        Task: `${process.env.NEXT_PUBLIC_URL}/api/tasks?taskId=${id}`,
+        Column: `${process.env.NEXT_PUBLIC_URL}/api/columns?columnId=${id}`,
+        Board: `${process.env.NEXT_PUBLIC_URL}/api/boards?boardId=${id}`
+      }
+
+      const res = await fetch(urlMap[type], { method: 'DELETE' })
+
+      if (res.ok) {
+        openCallback()
+        if (type === 'Board') {
+          const remaining = boards.filter((b) => b.id !== id)
+          if (remaining.length > 0) {
+            setActiveBoard(remaining[0].id, remaining[0].name)
+          } else {
+            clearActiveBoard()
+          }
+          router.refresh()
+        } else {
+          queryClient.invalidateQueries({ queryKey: ['columns'] })
+        }
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
   return (
     <DialogContent aria-describedby={undefined} className="bg-kpanal modal-content gap-8">
       <DialogHeader>
@@ -40,12 +83,14 @@ function Delete({ type, deleted, openCallback }: DeleteProps) {
         <Button
           variant="destructive"
           className="flex-1/2 h-13 px-6 py-4 rounded-full"
-          onClick={() => openCallback()}
+          onClick={handleDelete}
+          disabled={isDeleting}
         >
-          Delete
+          {isDeleting ? 'Deleting...' : 'Delete'}
         </Button>
         <Button
           className="text-primary-DEFAULT bg-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-400 dark:bg-kbackground flex-1/2  h-13 px-6 py-4 rounded-full"
+          disabled={isDeleting}
           onClick={() => openCallback()}
         >
           Cancel
@@ -55,4 +100,4 @@ function Delete({ type, deleted, openCallback }: DeleteProps) {
   )
 }
 
-export default Delete
+export default DeleteDialog

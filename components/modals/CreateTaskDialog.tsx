@@ -30,7 +30,7 @@ import { useBoardStore } from '@/providers/board-store-provider'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
-function CreateTask() {
+function CreateTaskDialog() {
   const [open, setOpen] = useState(false)
 
   const columns = useBoardStore((state) => state.columns)
@@ -246,4 +246,4 @@ function CreateTask() {
   )
 }
 
-export default CreateTask
+export default CreateTaskDialog

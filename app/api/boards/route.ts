@@ -75,3 +75,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create board' }, { status: 500 })
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { user, error } = await getCurrentDbUser()
+    if (error) return error
+
+    const boardId = req.nextUrl.searchParams.get('boardId')
+    if (!boardId) return NextResponse.json({ error: 'boardId is required' }, { status: 400 })
+
+    const board = await prisma.board.findFirst({
+      where: { id: BigInt(boardId), ownerId: user.id }
+    })
+    if (!board) return NextResponse.json({ error: 'Board not found' }, { status: 404 })
+
+    await prisma.board.delete({ where: { id: BigInt(boardId) } })
+
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch (error) {
+    console.error('Failed to delete board:', error)
+    return NextResponse.json({ error: 'Failed to delete board' }, { status: 500 })
+  }
+}

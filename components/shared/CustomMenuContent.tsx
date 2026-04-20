@@ -2,14 +2,15 @@
 import { PencilIcon, TrashIcon } from 'lucide-react'
 import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '../ui/context-menu'
 import { Dialog } from '../ui/dialog'
-import Delete from '../modals/Delete'
 import { useState } from 'react'
+import DeleteDialog from '../modals/DeleteDialog'
 
 interface Props {
   type: 'Column'
+  id: number
   deleted: string
 }
-function CustomMenuContent({ type, deleted }: Props) {
+function CustomMenuContent({ type, id, deleted }: Props) {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -31,7 +32,7 @@ function CustomMenuContent({ type, deleted }: Props) {
           setOpen(!open)
         }}
       >
-        <Delete type={type} deleted={deleted} openCallback={() => setOpen(!open)} />
+        <DeleteDialog type={type} deleted={deleted} id={id} openCallback={() => setOpen(!open)} />
       </Dialog>
     </>
   )

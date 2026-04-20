@@ -1,6 +1,7 @@
 import CustomSidebar from '@/components/shared/CustomSidebar'
 import Header from '@/components/shared/Header'
 import { SidebarProvider } from '@/components/ui/sidebar'
+import { boards } from '@/mocks/board.model'
 import { BoardStoreProvider } from '@/providers/board-store-provider'
 import QueryProvider from '@/providers/query-provider'
 import { Show } from '@clerk/nextjs'
@@ -15,6 +16,7 @@ async function layout({
 }>) {
   const cookieStore = await cookies()
   const sidebar_state = cookieStore.get('sidebar_state')?.value
+  const activeBoard = cookieStore.get('active-board')?.value
 
   const user = await auth()
   let data
@@ -34,7 +36,10 @@ async function layout({
           className="max-lg:min-h-[calc(100vh-73px)]"
         >
           <Show when="signed-in">
-            <CustomSidebar boards={JSON.stringify(data?.boards)} />
+            <CustomSidebar
+              boards={JSON.stringify(data?.boards)}
+              activeBoard={activeBoard || String(boards[0].id)}
+            />
           </Show>
           {children}
         </SidebarProvider>

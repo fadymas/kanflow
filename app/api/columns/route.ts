@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
 
+    console.log(typeof body.boardId)
     if (!body.boardId) return NextResponse.json({ error: 'boardId is required' }, { status: 400 })
 
     const board = await prisma.board.findFirst({

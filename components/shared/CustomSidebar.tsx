@@ -18,32 +18,35 @@ import { Plus } from 'lucide-react'
 
 import SwitchDualIconLabelDemo from '../vendor/shadcn-studio/switch/switch-11'
 import { Board } from '@/mocks/board.model'
-import CreateBoard from '../modals/CreateBoard'
+import CreateBoard from '../modals/CreateBoardDialog'
 import { ClerkLoaded, ClerkLoading, UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { useEffect, useState } from 'react'
 
-function CustomSidebar({ boards }: { boards: string }) {
+function CustomSidebar({ boards, activeBoard }: { boards: string; activeBoard?: string }) {
   const parsedBoards = JSON.parse(boards)
   const { state, isMobile, setOpenMobile } = useSidebar()
   const [open, setOpen] = useState(false)
-
-  const activeBoardId = useBoardStore((state) => state.activeBoardId)
-  const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (parsedBoards.length === 0) return
+    setMounted(true)
+  }, [])
+  const activeBoardId = useBoardStore((state) => state.activeBoard?.id)
+  const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
+  const setBoards = useBoardStore((state) => state.setBoards)
 
-    if (!activeBoardId) {
-      setActiveBoardId(parsedBoards[0].id)
-    }
-  }, [activeBoardId, parsedBoards, setActiveBoardId])
+  useEffect(() => {
+    setBoards(parsedBoards)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boards])
+
   return (
     <>
       {isMobile && (
-        <SidebarTrigger className="absolute bg-primary-DEFAULT text-white bottom-10 left-5" />
+        <SidebarTrigger className="absolute bg-primary-DEFAULT text-white bottom-10 left-5 z-20" />
       )}
 
       <Sidebar collapsible="icon" className="relative border-r border-kborder py-8 h-full">
@@ -67,10 +70,13 @@ function CustomSidebar({ boards }: { boards: string }) {
                 <SidebarMenuItem key={board.id} className="flex items-center">
                   <SidebarMenuButton
                     className=" flex  items-center w-60.75! h-14 px-8   rounded-r-full  cursor-pointer gap-4 py-0 text-knetural-default transition-colors data-[active=true]:bg-primary-DEFAULT data-[active=true]:text-white font-bold text-[16px] "
-                    isActive={activeBoardId === board.id}
+                    isActive={
+                      activeBoardId ? activeBoardId === board.id : activeBoard === String(board.id)
+                    }
                     onClick={() => {
-                      setActiveBoardId(board.id)
+                      setActiveBoardId(board.id, board.name)
                       setOpenMobile(false)
+                      document.cookie = `active-board=${board.id}`
                     }}
                   >
                     <SidebarItem className="size-4.5!" />
@@ -111,23 +117,25 @@ function CustomSidebar({ boards }: { boards: string }) {
                   </SidebarMenuItem>
                 )}
 
-                {/* <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <div
-                      className={cn(
-                        `w-full flex justify-center h-20`,
-                        state === 'collapsed' && !isMobile ? '' : 'userButton'
-                      )}
-                    >
-                      <ClerkLoading>
-                        <p>Clerk is loading...</p>
-                      </ClerkLoading>
-                      <ClerkLoaded>
-                        <UserButton />
-                      </ClerkLoaded>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem> */}
+                {mounted && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <div
+                        className={cn(
+                          `w-full flex justify-center h-20`,
+                          state === 'collapsed' && !isMobile ? '' : 'userButton'
+                        )}
+                      >
+                        <ClerkLoading>
+                          <p>Clerk is loading...</p>
+                        </ClerkLoading>
+                        <ClerkLoaded>
+                          <UserButton />
+                        </ClerkLoaded>
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

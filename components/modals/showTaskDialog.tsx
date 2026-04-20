@@ -11,7 +11,7 @@ import {
 import { columns } from '@/mocks/column.model'
 import { Subtask } from '@/mocks/task.model'
 
-export default function ShowTask({ subTasks }: { subTasks: Subtask[] }) {
+export default function ShowTaskDialog({ subTasks }: { subTasks: Subtask[] }) {
   return (
     <FieldGroup>
       <FieldSet className=" min-inline-0">

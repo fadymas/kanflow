@@ -8,7 +8,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import ShowTask from '../modals/showTask'
+import ShowTask from '../modals/showTaskDialog'
 import CustomDropdownMenu from './CustomDropdownMenu'
 import { Draggable } from '@hello-pangea/dnd'
 import { Task } from '@/mocks/task.model'
@@ -71,7 +71,7 @@ export default function TaskCard({ index, task, className }: TaskCardProps) {
                   <DialogTitle className="text-lg font-bold text-foreground pr-8 line-clamp-3 text-ellipsis w-10/12">
                     {task.title}
                   </DialogTitle>
-                  <CustomDropdownMenu deleted={task.title} type="Task" />
+                  <CustomDropdownMenu deleted={task.title} type="Task" id={Number(task.id)} />
                 </div>
               </DialogHeader>
               <DialogDescription className="text-[14px] text-kdescription  line-clamp-3 text-ellipsis">
