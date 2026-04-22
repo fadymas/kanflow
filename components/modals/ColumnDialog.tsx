@@ -5,6 +5,7 @@ import { Sketch } from '@uiw/react-color'
 import { Pipette } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 import { useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
 import { colors } from '@/mocks/color.model'
 import { createColumnSchema, type CreateColumnSchema } from '@/lib/validation'
@@ -18,10 +19,19 @@ import { Input } from '../ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group'
 
-function CreateColumnDialog({ onSuccess }: { onSuccess?: () => void }) {
+interface Props {
+  onSuccess?: () => void
+  editId?: string
+}
+
+function ColumnDialog({ onSuccess, editId }: Props) {
+  const isEditMode = Boolean(editId)
   const activeBoardId = useBoardStore((state) => state.activeBoard?.id)
   const queryClient = useQueryClient()
 
+  const columns = useBoardStore((state) => state.columns)
+  const existingColumn = columns.find((column) => column.id == editId)
+  console.log(columns, editId)
   const form = useForm<CreateColumnSchema>({
     resolver: zodResolver(createColumnSchema),
     defaultValues: {
@@ -30,21 +40,55 @@ function CreateColumnDialog({ onSuccess }: { onSuccess?: () => void }) {
     }
   })
 
+  // Populate form when editing
+  useEffect(() => {
+    if (isEditMode && existingColumn) {
+      form.reset({
+        title: existingColumn.name ?? '',
+        color: existingColumn.color ?? colors[0]?.hex ?? ''
+      })
+    }
+  }, [isEditMode, existingColumn, form])
+
   const { isSubmitting } = form.formState
 
   async function onSubmit(values: CreateColumnSchema) {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns`, {
-        method: 'POST',
-        body: JSON.stringify({ ...values, boardId: activeBoardId }),
-        headers: { Accept: 'application/json' }
-      })
+      if (isEditMode) {
+        // --- EDIT ---
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            columnId: editId,
+            name: values.title,
+            color: values.color
+          }),
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
+        })
 
-      if (res.ok) {
-        form.reset()
-        onSuccess?.()
-        queryClient.invalidateQueries({ queryKey: ['columns'] })
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          console.error('Failed to update column:', data)
+          return
+        }
+      } else {
+        // --- CREATE ---
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns`, {
+          method: 'POST',
+          body: JSON.stringify({ ...values, boardId: activeBoardId }),
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
+        })
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          console.error('Failed to create column:', data)
+          return
+        }
       }
+
+      form.reset()
+      onSuccess?.()
+      queryClient.invalidateQueries({ queryKey: ['columns'] })
     } catch (error) {
       console.error(error)
     }
@@ -53,7 +97,9 @@ function CreateColumnDialog({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <DialogContent aria-describedby={undefined} className="modal-content gap-8 bg-kpanal">
       <DialogHeader>
-        <DialogTitle className="bold-20 text-foreground">Create New Column</DialogTitle>
+        <DialogTitle className="bold-20 text-foreground">
+          {isEditMode ? 'Edit Column' : 'Create New Column'}
+        </DialogTitle>
       </DialogHeader>
       <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
         <FieldGroup>
@@ -140,7 +186,13 @@ function CreateColumnDialog({ onSuccess }: { onSuccess?: () => void }) {
             disabled={isSubmitting}
             className="mt-6 h-13 w-full rounded-full bg-ksecondary p-4 text-white bold-14"
           >
-            {isSubmitting ? 'Creating...' : 'Create New Column'}
+            {isSubmitting
+              ? isEditMode
+                ? 'Saving...'
+                : 'Creating...'
+              : isEditMode
+                ? 'Save Changes'
+                : 'Create New Column'}
           </Button>
         </FieldGroup>
       </form>
@@ -148,4 +200,4 @@ function CreateColumnDialog({ onSuccess }: { onSuccess?: () => void }) {
   )
 }
 
-export default CreateColumnDialog
+export default ColumnDialog

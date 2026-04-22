@@ -6,14 +6,14 @@ import { Board } from '@/mocks/board.model'
 export type BoardState = {
   activeBoard: { name: string; id: number } | null
   columns: Columndb[]
-  boards: Pick<Board, 'id' | 'name'>[]
+  boards: Board[]
 }
 
 export type BoardActions = {
   setActiveBoard: (boardId: number, name: string) => void
   clearActiveBoard: () => void
   setColumns: (columns: Columndb[]) => void
-  setBoards: (boards: Pick<Board, 'id' | 'name'>[]) => void
+  setBoards: (boards: Board[]) => void
 }
 
 export type BoardStore = BoardState & BoardActions

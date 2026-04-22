@@ -4,35 +4,53 @@ import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '../ui
 import { Dialog } from '../ui/dialog'
 import { useState } from 'react'
 import DeleteDialog from '../modals/DeleteDialog'
+import ColumnDialog from '../modals/ColumnDialog'
 
 interface Props {
-  type: 'Column'
   id: number
-  deleted: string
+  name: string
+  color?: string
 }
-function CustomMenuContent({ type, id, deleted }: Props) {
-  const [open, setOpen] = useState(false)
+function CustomMenuContent({ id, name }: Props) {
+  const [openDelete, setOpenDelete] = useState(false)
+  const [openEdit, setOpenEdit] = useState(false)
   return (
     <>
       <ContextMenuContent>
-        <ContextMenuItem>
+        <ContextMenuItem onSelect={() => setOpenEdit(!openEdit)}>
           <PencilIcon />
           Edit Column
         </ContextMenuItem>
         <ContextMenuSeparator />
 
-        <ContextMenuItem variant="destructive" onSelect={() => setOpen(!open)}>
+        <ContextMenuItem variant="destructive" onSelect={() => setOpenDelete(!openDelete)}>
           <TrashIcon />
           Delete Column
         </ContextMenuItem>
       </ContextMenuContent>
       <Dialog
-        open={open}
+        open={openDelete}
         onOpenChange={() => {
-          setOpen(!open)
+          setOpenDelete(!openDelete)
         }}
       >
-        <DeleteDialog type={type} deleted={deleted} id={id} openCallback={() => setOpen(!open)} />
+        {openDelete && (
+          <DeleteDialog
+            type={'Column'}
+            deleted={name}
+            id={id}
+            openCallback={() => setOpenDelete(!openDelete)}
+          />
+        )}
+      </Dialog>
+
+      <Dialog
+        open={openEdit}
+        onOpenChange={() => {
+          setOpenEdit(!openEdit)
+        }}
+      >
+        {openEdit && <ColumnDialog onSuccess={() => setOpenEdit(!openEdit)} editId={String(id)} />}
       </Dialog>
     </>
   )

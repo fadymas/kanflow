@@ -4,12 +4,12 @@ import TaskCard from './TaskCard'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
-import CreateColumn from '../modals/CreateColumnDialog'
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu'
 import CustomMenuContent from './CustomMenuContent'
 import { Droppable } from '@hello-pangea/dnd'
 import { Task } from '@/mocks/task.model'
 import { useState } from 'react'
+import ColumnDialog from '../modals/ColumnDialog'
 
 interface ColumnProps {
   id?: string
@@ -46,7 +46,7 @@ export default function Column({
             </span>
           </Button>
         </DialogTrigger>
-        <CreateColumn onSuccess={() => setOpen(false)} />
+        {open && <ColumnDialog onSuccess={() => setOpen(false)} />}
       </Dialog>
     )
   }
@@ -81,7 +81,7 @@ export default function Column({
             )}
           </Droppable>
         </ContextMenuTrigger>
-        <CustomMenuContent type="Column" id={Number(id)} deleted={title || 'Unnamed Column'} />
+        <CustomMenuContent id={Number(id)} name={title || 'Unnamed Column'} />
       </ContextMenu>
     </div>
   )

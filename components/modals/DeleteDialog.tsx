@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { useBoardStore } from '@/providers/board-store-provider'
 
@@ -23,10 +22,10 @@ interface DeleteProps {
 
 function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
   const [isDeleting, setIsDeleting] = useState(false)
-  const router = useRouter()
   const queryClient = useQueryClient()
   const clearActiveBoard = useBoardStore((state) => state.clearActiveBoard)
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
+  const setBoards = useBoardStore((state) => state.setBoards)
   const boards = useBoardStore((state) => state.boards)
 
   async function handleDelete() {
@@ -41,18 +40,18 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
       const res = await fetch(urlMap[type], { method: 'DELETE' })
 
       if (res.ok) {
-        openCallback()
         if (type === 'Board') {
           const remaining = boards.filter((b) => b.id !== id)
+          setBoards(remaining)
           if (remaining.length > 0) {
             setActiveBoard(remaining[0].id, remaining[0].name)
           } else {
             clearActiveBoard()
           }
-          router.refresh()
         } else {
           queryClient.invalidateQueries({ queryKey: ['columns'] })
         }
+        openCallback()
       }
     } catch (error) {
       console.error(error)

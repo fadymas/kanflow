@@ -37,7 +37,7 @@ async function layout({
         >
           <Show when="signed-in">
             <CustomSidebar
-              boards={JSON.stringify(data?.boards)}
+              boards={JSON.stringify(data?.boards || [])}
               activeBoard={activeBoard || String(boards[0].id)}
             />
           </Show>

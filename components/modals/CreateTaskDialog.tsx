@@ -45,18 +45,17 @@ function CreateTaskDialog() {
       column: ''
     }
   })
+  const { isSubmitting } = form.formState
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'subtasks'
+  })
+
   useEffect(() => {
     if (columns?.length > 0) {
       form.setValue('column', String(columns[0].id))
     }
   }, [columns, form])
-
-  const { isSubmitting } = form.formState
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'subtasks'
-  })
 
   async function onSubmit(values: CreateTaskSchema) {
     try {
@@ -69,7 +68,6 @@ function CreateTaskDialog() {
       })
 
       if (res.ok) {
-        await res.json()
         form.reset()
         setOpen(false)
         queryClient.invalidateQueries({ queryKey: ['columns'] })

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 import SidebarItem from '../../public/icons/sidebar-item.svg'
 import {
@@ -26,22 +27,20 @@ import { useBoardStore } from '@/providers/board-store-provider'
 import { useEffect, useState } from 'react'
 
 function CustomSidebar({ boards, activeBoard }: { boards: string; activeBoard?: string }) {
-  const parsedBoards = JSON.parse(boards)
   const { state, isMobile, setOpenMobile } = useSidebar()
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const parsedBoards = JSON.parse(boards)
   const activeBoardId = useBoardStore((state) => state.activeBoard?.id)
   const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
   const setBoards = useBoardStore((state) => state.setBoards)
+  const storedBoards = useBoardStore((state) => state.boards)
 
   useEffect(() => {
+    setMounted(true)
     setBoards(parsedBoards)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boards])
+  }, [parsedBoards, setBoards])
 
   return (
     <>
@@ -62,11 +61,11 @@ function CustomSidebar({ boards, activeBoard }: { boards: string; activeBoard?: 
         <SidebarContent className={cn('justify-between ', isMobile ? 'pb-5' : '')}>
           <SidebarGroup className="p-0">
             <SidebarGroupLabel className="mb-4 px-8 text-[12px] font-bold tracking-[2.4px] text-knetural-default">
-              {`ALL BOARDS (${parsedBoards.length})`}
+              {`ALL BOARDS (${storedBoards.length})`}
             </SidebarGroupLabel>
 
             <SidebarMenu className="gap-2  mb-5">
-              {parsedBoards.map((board: Board) => (
+              {storedBoards.map((board: Board) => (
                 <SidebarMenuItem key={board.id} className="flex items-center">
                   <SidebarMenuButton
                     className=" flex  items-center w-60.75! h-14 px-8   rounded-r-full  cursor-pointer gap-4 py-0 text-knetural-default transition-colors data-[active=true]:bg-primary-DEFAULT data-[active=true]:text-white font-bold text-[16px] "
