@@ -18,29 +18,26 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 
 import SwitchDualIconLabelDemo from '../vendor/shadcn-studio/switch/switch-11'
-import { Board } from '@/mocks/board.model'
-import CreateBoard from '../modals/CreateBoardDialog'
+import CreateBoard from '../dialogs/BoardDialog'
 import { ClerkLoaded, ClerkLoading, UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { useEffect, useState } from 'react'
 
-function CustomSidebar({ boards, activeBoard }: { boards: string; activeBoard?: string }) {
+function CustomSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar()
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  const parsedBoards = JSON.parse(boards)
   const activeBoardId = useBoardStore((state) => state.activeBoard?.id)
   const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
-  const setBoards = useBoardStore((state) => state.setBoards)
   const storedBoards = useBoardStore((state) => state.boards)
+  const setColumns = useBoardStore((state) => state.setColumns)
 
   useEffect(() => {
     setMounted(true)
-    setBoards(parsedBoards)
-  }, [parsedBoards, setBoards])
+  }, [])
 
   return (
     <>
@@ -65,17 +62,19 @@ function CustomSidebar({ boards, activeBoard }: { boards: string; activeBoard?: 
             </SidebarGroupLabel>
 
             <SidebarMenu className="gap-2  mb-5">
-              {storedBoards.map((board: Board) => (
+              {storedBoards.map((board: { id: number; name: string }) => (
                 <SidebarMenuItem key={board.id} className="flex items-center">
                   <SidebarMenuButton
                     className=" flex  items-center w-60.75! h-14 px-8   rounded-r-full  cursor-pointer gap-4 py-0 text-knetural-default transition-colors data-[active=true]:bg-primary-DEFAULT data-[active=true]:text-white font-bold text-[16px] "
-                    isActive={
-                      activeBoardId ? activeBoardId === board.id : activeBoard === String(board.id)
-                    }
+                    isActive={activeBoardId ? activeBoardId === board.id : false}
                     onClick={() => {
                       setActiveBoardId(board.id, board.name)
+                      setColumns(
+                        storedBoards.find((storedBoard) => storedBoard.id == board.id)?.Column || []
+                      )
                       setOpenMobile(false)
-                      document.cookie = `active-board=${board.id}`
+                      document.cookie = `active-boardId=${board.id}`
+                      document.cookie = `active-boardName=${board.name}`
                     }}
                   >
                     <SidebarItem className="size-4.5!" />
@@ -93,7 +92,7 @@ function CustomSidebar({ boards, activeBoard }: { boards: string; activeBoard?: 
                       <span>Create New Board</span>
                     </SidebarMenuButton>
                   </DialogTrigger>
-                  <CreateBoard onSuccess={() => setOpen(false)} />
+                  {open && <CreateBoard onSuccess={() => setOpen(false)} />}
                 </Dialog>
               </SidebarMenuItem>
             </SidebarMenu>

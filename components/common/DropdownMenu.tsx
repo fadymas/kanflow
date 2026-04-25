@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import CreateBoard from '../modals/CreateBoardDialog'
+import BoardDialog from '../dialogs/BoardDialog'
 import { Button } from '../ui/button'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import {
@@ -12,7 +12,7 @@ import {
 } from '../ui/dropdown-menu'
 import { EllipsisVertical, PencilIcon, Plus, TrashIcon } from 'lucide-react'
 import { useBoardStore } from '@/providers/board-store-provider'
-import DeleteDialog from '../modals/DeleteDialog'
+import DeleteDialog from '../dialogs/DeleteDialog'
 
 interface Props {
   type: 'Board' | 'Task'
@@ -21,10 +21,13 @@ interface Props {
 }
 
 function CustomDropdownMenu({ type, id, deleted }: Props) {
-  const [open, setOpen] = useState(false)
+  const [openDelete, setOpenDelete] = useState(false)
   const [openAddBoard, setOpenAddBoard] = useState(false)
+  const [openRenameBoard, setOpenRenameBoard] = useState(false)
 
   const activeBoard = useBoardStore((state) => state.activeBoard)
+
+  const boardId = id ?? activeBoard?.id
 
   return (
     <>
@@ -34,47 +37,53 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
             <EllipsisVertical size={18} className="size-4.5! text-knetural-default" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="bg-kbackground">
+        <DropdownMenuContent className="bg-kbackground w-35">
           {type === 'Board' && (
             <Dialog open={openAddBoard} onOpenChange={setOpenAddBoard}>
               <DialogTrigger asChild>
                 <DropdownMenuItem
                   className="text-primary-DEFAULT md:hidden"
-                  onSelect={(e) => {
-                    e.preventDefault()
-                  }}
+                  onSelect={(e) => e.preventDefault()}
                 >
                   <Plus className="size-4" />
                   Add Board
                 </DropdownMenuItem>
               </DialogTrigger>
-              <CreateBoard onSuccess={() => setOpen(false)} />
+              <BoardDialog onSuccess={() => setOpenAddBoard(false)} />
             </Dialog>
           )}
 
-          <DropdownMenuItem>
-            <PencilIcon className="size-4" />
-            Edit
-          </DropdownMenuItem>
+          <Dialog open={openRenameBoard} onOpenChange={setOpenRenameBoard}>
+            <DialogTrigger asChild>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <PencilIcon className="size-4" />
+                {type === 'Board' ? 'Change Name' : 'Edit'}
+              </DropdownMenuItem>
+            </DialogTrigger>
+            {type === 'Board' && openRenameBoard && (
+              <BoardDialog editId={boardId} onSuccess={() => setOpenRenameBoard(false)} />
+            )}
+          </Dialog>
+
           <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onSelect={() => setOpen(!open)}>
-            <TrashIcon className=" size-4" />
+          <DropdownMenuItem variant="destructive" onSelect={() => setOpenDelete(!openDelete)}>
+            <TrashIcon className="size-4" />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       <Dialog
-        open={open}
+        open={openDelete}
         onOpenChange={() => {
-          setOpen(!open)
+          setOpenDelete(!openDelete)
         }}
       >
         <DeleteDialog
           type={type}
           id={id ? id : activeBoard?.id}
           deleted={deleted ? deleted : activeBoard?.name}
-          openCallback={() => setOpen(!open)}
+          openCallback={() => setOpenDelete(!openDelete)}
         />
       </Dialog>
     </>

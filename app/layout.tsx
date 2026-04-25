@@ -4,7 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { shadcn } from '@clerk/ui/themes'
 import { ui } from '@clerk/ui'
 import { Plus_Jakarta_Sans } from 'next/font/google'
-import ThemeLayout from '@/components/layout/ThemeLayout'
+import ThemeLayout from '@/components/common/ThemeLayout'
 import './globals.css'
 
 export const metadata: Metadata = {

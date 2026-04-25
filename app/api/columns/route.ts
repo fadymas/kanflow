@@ -1,18 +1,8 @@
 import { prisma } from '@/lib/prisma'
-import { getCurrentDbUser } from '@/lib/server/api'
+import { getCurrentDbUser, sanitize } from '@/lib/server/api'
 import { getRandomHexColor } from '@/lib/utils'
 import { createColumnSchema } from '@/lib/validation'
 import { NextRequest, NextResponse } from 'next/server'
-
-function sanitize(value: unknown): unknown {
-  if (typeof value === 'bigint') return Number(value)
-  if (Array.isArray(value)) return value.map(sanitize)
-  if (value !== null && typeof value === 'object')
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, sanitize(v)])
-    )
-  return value
-}
 
 // GET /api/columns?boardId=123
 export async function GET(req: NextRequest) {

@@ -1,17 +1,7 @@
 import { prisma } from '@/lib/prisma'
-import { getCurrentDbUser } from '@/lib/server/api'
+import { getCurrentDbUser, sanitize } from '@/lib/server/api'
 import { createTaskSchema } from '@/lib/validation'
 import { NextRequest, NextResponse } from 'next/server'
-
-function sanitize(value: unknown): unknown {
-  if (typeof value === 'bigint') return Number(value)
-  if (Array.isArray(value)) return value.map(sanitize)
-  if (value !== null && typeof value === 'object')
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, sanitize(v)])
-    )
-  return value
-}
 
 // GET /api/tasks?columnId=123
 export async function GET(req: NextRequest) {
@@ -165,7 +155,26 @@ export async function DELETE(req: NextRequest) {
     if (!task || task.Column?.Board?.ownerId !== user.id)
       return NextResponse.json({ error: 'Task not found' }, { status: 404 })
 
-    await prisma.task.delete({ where: { id: BigInt(taskId) } })
+    const deletedPosition = Number(task.position ?? 0)
+    const columnId = task.columnId!
+
+    // Use a transaction so the delete + reorder are atomic
+    await prisma.$transaction([
+      // Delete the task (SubTasks cascade via schema)
+      prisma.task.delete({ where: { id: BigInt(taskId) } }),
+
+      // Shift every task that sat below the deleted one up by 1
+      // so positions stay compact with no gaps (e.g. 1,2,4 → 1,2,3)
+      prisma.task.updateMany({
+        where: {
+          columnId,
+          position: { gt: deletedPosition }
+        },
+        data: {
+          position: { decrement: 1 }
+        }
+      })
+    ])
 
     return NextResponse.json({ success: true }, { status: 200 })
   } catch (error) {

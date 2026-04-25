@@ -13,7 +13,7 @@ export default function UserMenu() {
         </Button>
       </Link>
       <Link href="/sign-up">
-        <Button className="bg-[#635fc7] hover:bg-[#4a46ad] text-white rounded-full px-6">
+        <Button className="bg-primary-DEFAULT hover:bg-ksecondary text-white rounded-full px-6">
           Sign Up
         </Button>
       </Link>

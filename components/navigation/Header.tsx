@@ -1,9 +1,9 @@
 import Image from 'next/image'
 import { Button } from '../ui/button'
 // import MobileNavMenu from './MobileNavMenu'
-import CustomDropdownMenu from './CustomDropdownMenu'
+import CustomDropdownMenu from '../common/DropdownMenu'
 import { Show, SignInButton, SignUpButton } from '@clerk/nextjs'
-import CreateTask from '../modals/CreateTaskDialog'
+import CreateTask from '../dialogs/CreateTaskDialog'
 
 async function Header() {
   return (

@@ -28,3 +28,10 @@ export async function getCurrentDbUser() {
 
   return { error: null, user }
 }
+
+export function sanitize(value: unknown): unknown {
+  const parsed = JSON.parse(
+    JSON.stringify(value, (_, value) => (typeof value === 'bigint' ? Number(value) : value))
+  )
+  return parsed
+}

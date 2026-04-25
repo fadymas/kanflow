@@ -27,6 +27,7 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
   const setBoards = useBoardStore((state) => state.setBoards)
   const boards = useBoardStore((state) => state.boards)
+  const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
 
   async function handleDelete() {
     setIsDeleting(true)
@@ -49,6 +50,7 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
             clearActiveBoard()
           }
         } else {
+          setOpenTaskId(null)
           queryClient.invalidateQueries({ queryKey: ['columns'] })
         }
         openCallback()

@@ -1,32 +1,35 @@
 'use client'
 import { DragDropContext, DropResult } from '@hello-pangea/dnd'
-import Column from './Column'
-import { useBoardStore } from '@/providers/board-store-provider'
-import { Columndb } from '@/mocks/column.model'
+import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import Column from './Column'
+import TaskDialogModal from '../dialogs/TaskDialogModal'
+import { useBoardStore } from '@/providers/board-store-provider'
+import { Columndb } from '@/mocks/column.mock'
+
 function Board() {
   const activeBoard = useBoardStore((s) => s.activeBoard)
   const setColumns = useBoardStore((s) => s.setColumns)
+  const storedColumns = useBoardStore((s) => s.columns)
 
   const {
     data: columns = [],
     isLoading,
     status
   } = useQuery({
-    queryKey: ['columns', activeBoard],
+    queryKey: ['columns', activeBoard?.id],
     queryFn: () =>
       fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns?boardId=${activeBoard?.id}`)
         .then((res) => res.json())
-        .then((data) => {
-          const cols = data.columns ?? []
-          setColumns(cols) // save to store
-          return cols
-        }),
-    enabled: !!activeBoard
+        .then((data) => data.columns ?? []),
+    enabled: !!activeBoard?.id
   })
 
+  useEffect(() => {
+    setColumns(columns)
+  }, [columns, setColumns])
+
   function onDragEnd(result: DropResult) {
-    // optimistic reorder logic here later
     console.log(result)
   }
 
@@ -36,8 +39,9 @@ function Board() {
 
   return (
     <>
+      <TaskDialogModal />
       <DragDropContext onDragEnd={onDragEnd}>
-        {columns.map((column: Columndb) => (
+        {storedColumns.map((column: Columndb) => (
           <Column
             key={column.id}
             id={column.id}

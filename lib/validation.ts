@@ -13,6 +13,13 @@ export const createBoardSchema = z.object({
 
 export type CreateBoardSchema = z.infer<typeof createBoardSchema>
 
+export const renameBoardSchema = z.object({
+  boardId: z.number({ required_error: 'Board ID is required' }),
+  name: z.string().trim().min(1, 'Board name is required')
+})
+
+export type RenameBoardSchema = z.infer<typeof renameBoardSchema>
+
 export const createColumnSchema = z.object({
   title: z.string().trim().min(1, 'Column name is required'),
   color: z

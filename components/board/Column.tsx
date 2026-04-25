@@ -5,11 +5,11 @@ import { Plus } from 'lucide-react'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu'
-import CustomMenuContent from './CustomMenuContent'
+import CustomMenuContent from '../common/MenuContent'
 import { Droppable } from '@hello-pangea/dnd'
 import { Task } from '@/mocks/task.model'
 import { useState } from 'react'
-import ColumnDialog from '../modals/ColumnDialog'
+import ColumnDialog from '../dialogs/ColumnDialog'
 
 interface ColumnProps {
   id?: string

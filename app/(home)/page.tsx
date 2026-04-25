@@ -1,5 +1,5 @@
-import Board from '@/components/shared/Board'
-import Welcome from '@/components/layout/Welcome'
+import Board from '@/components/board/Board'
+import Welcome from '@/components/common/Welcome'
 
 import { Show } from '@clerk/nextjs'
 

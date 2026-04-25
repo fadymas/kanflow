@@ -7,7 +7,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-import { colors } from '@/mocks/color.model'
+import { colors } from '@/mocks/color.mock'
 import { createColumnSchema, type CreateColumnSchema } from '@/lib/validation'
 import { cn } from '@/lib/utils'
 import { useBoardStore } from '@/providers/board-store-provider'
@@ -31,7 +31,6 @@ function ColumnDialog({ onSuccess, editId }: Props) {
 
   const columns = useBoardStore((state) => state.columns)
   const existingColumn = columns.find((column) => column.id == editId)
-  console.log(columns, editId)
   const form = useForm<CreateColumnSchema>({
     resolver: zodResolver(createColumnSchema),
     defaultValues: {

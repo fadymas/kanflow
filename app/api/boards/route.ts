@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
-import { getCurrentDbUser } from '@/lib/server/api'
+import { getCurrentDbUser, sanitize } from '@/lib/server/api'
 import { getRandomHexColor } from '@/lib/utils'
-import { createBoardSchema } from '@/lib/validation'
+import { createBoardSchema, renameBoardSchema } from '@/lib/validation'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {
@@ -14,7 +14,7 @@ export async function GET() {
 
     const boards = await prisma.board.findMany({
       where: { ownerId: user.id },
-      select: { id: true, name: true },
+      select: { id: true, name: true, Column: { select: { id: true, name: true, position: true, color: true } } },
       orderBy: { created_at: 'asc' }
     })
 
@@ -73,6 +73,39 @@ export async function POST(req: NextRequest) {
 
     console.error('Failed to create board:', error)
     return NextResponse.json({ error: 'Failed to create board' }, { status: 500 })
+  }
+}
+
+// PATCH /api/boards  body: { boardId, name }
+export async function PATCH(req: NextRequest) {
+  try {
+    const { user, error } = await getCurrentDbUser()
+    if (error) return error
+
+    const body = await req.json()
+    const parsed = renameBoardSchema.safeParse(body)
+    if (!parsed.success)
+      return NextResponse.json(
+        { error: 'Invalid data', issues: parsed.error.flatten() },
+        { status: 400 }
+      )
+
+    const board = await prisma.board.findFirst({
+      where: { id: BigInt(parsed.data.boardId), ownerId: user.id }
+    })
+    if (!board) return NextResponse.json({ error: 'Board not found' }, { status: 404 })
+
+    const updated = await prisma.board.update({
+      where: { id: BigInt(parsed.data.boardId) },
+      data: { name: parsed.data.name, updated_at: new Date() }
+    })
+
+    const safeBoard = sanitize(updated)
+
+    return NextResponse.json({ board: safeBoard }, { status: 200 })
+  } catch (error) {
+    console.error('Failed to rename board:', error)
+    return NextResponse.json({ error: 'Failed to rename board' }, { status: 500 })
   }
 }
 
