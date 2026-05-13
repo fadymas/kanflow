@@ -72,7 +72,7 @@
     font-weight: bold;
   }
 
-  /* /typography */
+  /* /dialog */
   .modal-content {
     @apply lg:max-w-120 w-120 rounded-modal p-8;
   }

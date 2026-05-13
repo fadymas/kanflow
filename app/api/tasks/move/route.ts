@@ -30,18 +30,34 @@ export async function PATCH(req: NextRequest) {
     if (!targetColumn || targetColumn.Board?.ownerId !== user.id)
       return NextResponse.json({ error: 'Column not found' }, { status: 404 })
 
-    // Place at the end of the column
+    const sourceColumnId = task.columnId
+    const sourcePosition = Number(task.position)
+    const targetColumnId = BigInt(body.columnId)
+
+    // Place at the end of the target column
     const lastTask = await prisma.task.findFirst({
-      where: { columnId: BigInt(body.columnId) },
+      where: { columnId: targetColumnId },
       orderBy: { position: 'desc' }
     })
     const nextPosition = lastTask?.position ? Number(lastTask.position) + 1 : 1
 
-    const updated = await prisma.task.update({
-      where: { id: BigInt(body.taskId) },
-      data: { columnId: BigInt(body.columnId), updated_at: new Date(), position: nextPosition },
-      include: { SubTask: true }
-    })
+    const [updated] = await prisma.$transaction([
+      // Move the task to the target column at the last position
+      prisma.task.update({
+        where: { id: BigInt(body.taskId) },
+        data: { columnId: targetColumnId, updated_at: new Date(), position: nextPosition },
+        include: { SubTask: true }
+      }),
+      // Decrement positions of tasks that were after the moved task in the source column
+      prisma.task.updateMany({
+        where: {
+          columnId: sourceColumnId,
+          position: { gt: sourcePosition },
+          id: { not: BigInt(body.taskId) }
+        },
+        data: { position: { decrement: 1 } }
+      })
+    ])
 
     return NextResponse.json({ task: sanitize(updated) }, { status: 200 })
   } catch (error) {

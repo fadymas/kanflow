@@ -34,6 +34,7 @@ function CustomSidebar() {
   const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
   const storedBoards = useBoardStore((state) => state.boards)
   const setColumns = useBoardStore((state) => state.setColumns)
+  console.log(storedBoards)
 
   useEffect(() => {
     setMounted(true)
@@ -69,9 +70,7 @@ function CustomSidebar() {
                     isActive={activeBoardId ? activeBoardId === board.id : false}
                     onClick={() => {
                       setActiveBoardId(board.id, board.name)
-                      setColumns(
-                        storedBoards.find((storedBoard) => storedBoard.id == board.id)?.Column || []
-                      )
+
                       setOpenMobile(false)
                       document.cookie = `active-boardId=${board.id}`
                       document.cookie = `active-boardName=${board.name}`
@@ -115,25 +114,27 @@ function CustomSidebar() {
                   </SidebarMenuItem>
                 )}
 
-                {mounted && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <div
-                        className={cn(
-                          `w-full flex justify-center h-20`,
-                          state === 'collapsed' && !isMobile ? '' : 'userButton'
-                        )}
-                      >
-                        <ClerkLoading>
-                          <p>Clerk is loading...</p>
-                        </ClerkLoading>
-                        <ClerkLoaded>
-                          <UserButton />
-                        </ClerkLoaded>
-                      </div>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <div
+                      className={cn(
+                        `w-full flex justify-center h-20`,
+                        state === 'collapsed' && !isMobile ? '' : 'userButton'
+                      )}
+                    >
+                      {mounted ? (
+                        <UserButton />
+                      ) : (
+                        <div
+                          className={cn(
+                            `w-full flex justify-center size-5.25! bg-black rounded-full`,
+                            state === 'collapsed' && !isMobile ? '' : 'size-20!'
+                          )}
+                        ></div>
+                      )}
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

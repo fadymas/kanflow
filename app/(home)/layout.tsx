@@ -27,14 +27,14 @@ async function layout({
       headers: await headers()
     })
     data = await res.json()
-    columns = data.boards?.find((board: Board) => board.id == Number(activeBoardId)).Column
+    columns = data.boards?.find((board: Board) => board.id == Number(activeBoardId))?.Column
   }
 
   return (
     <QueryProvider>
       <BoardStoreProvider
         initial={{
-          boards: data.boards || [],
+          boards: data?.boards || [],
           activeBoard: { id: Number(activeBoardId), name: activeBoardName },
           columns: columns,
           openTaskId: null

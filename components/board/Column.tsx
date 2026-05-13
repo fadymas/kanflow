@@ -76,6 +76,7 @@ export default function Column({
                 {tasks?.map((task) => (
                   <TaskCard key={task.id} task={task} index={Number(task.position)} />
                 ))}
+                {provided.placeholder}
               </div>
             )}
           </Droppable>

@@ -25,7 +25,7 @@ export type BoardActions = {
       Column: Columndb[]
     }[]
   ) => void
-  moveTask: (taskId: string, fromColumnId: string, toColumndId: string, task: Task) => void
+  changeTaskColumn: (taskId: string, fromColumnId: string, toColumnId: string, task: Task) => void
   setOpenTaskId: (taskId: string | null) => void
 }
 
@@ -48,7 +48,7 @@ export const createBoardStore = (initState: BoardState = defaultInitState) => {
         setColumns: (columns) => set({ columns }),
         setBoards: (boards) => set({ boards }),
         setOpenTaskId: (taskId) => set({ openTaskId: taskId }),
-        moveTask: (taskId, fromColumnId, toColumnId, task) =>
+        changeTaskColumn: (taskId, fromColumnId, toColumnId, task) =>
           set((state) => ({
             columns: state.columns.map((col) => {
               if (col.id == fromColumnId)

@@ -23,7 +23,7 @@ export default function TaskDialogActions({
   taskId: string
 }) {
   const columns = useBoardStore((state) => state.columns)
-  const moveTask = useBoardStore((state) => state.moveTask)
+  const changeTaskColumn = useBoardStore((state) => state.changeTaskColumn)
 
   const taskCurrentColumn = columns.find((column) => column.id == columnId)
   const [localSubTasks, setLocalSubTasks] = useState(subTasks)
@@ -76,7 +76,7 @@ export default function TaskDialogActions({
       })
       if (res.ok) {
         const data = await res.json()
-        moveTask(taskId, columnId, newColumnId, data.task)
+        changeTaskColumn(taskId, columnId, newColumnId, data.task)
       }
     } catch (error) {
       console.log(error)
