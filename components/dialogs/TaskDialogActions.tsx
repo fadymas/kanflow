@@ -10,8 +10,9 @@ import {
   ComboboxItem,
   ComboboxList
 } from '../ui/combobox'
-import { Subtask } from '@/mocks/task.model'
+import { Subtask } from '@/mocks/task.mock'
 import { useBoardStore } from '@/providers/board-store-provider'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function TaskDialogActions({
   subTasks,
@@ -23,13 +24,13 @@ export default function TaskDialogActions({
   taskId: string
 }) {
   const columns = useBoardStore((state) => state.columns)
-  const changeTaskColumn = useBoardStore((state) => state.changeTaskColumn)
+  const activeBoard = useBoardStore((state) => state.activeBoard)
+  const queryClient = useQueryClient()
 
   const taskCurrentColumn = columns.find((column) => column.id == columnId)
   const [localSubTasks, setLocalSubTasks] = useState(subTasks)
   const [selectedColumnValue, setSelectedColumnValue] = useState(taskCurrentColumn?.name || '')
 
-  // Update selected column value when the task moves to a different column
   useEffect(() => {
     setSelectedColumnValue(taskCurrentColumn?.name || '')
   }, [taskCurrentColumn?.name])
@@ -50,21 +51,21 @@ export default function TaskDialogActions({
       })
 
       if (!res.ok) {
-        // Revert on failure
         setLocalSubTasks((prev) =>
           prev.map((s) => (s.id === subTaskId ? { ...s, isCompleted: current } : s))
         )
         console.error('Failed to update subtask')
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['columns', activeBoard?.id] })
       }
     } catch (error) {
-      // Revert on failure
       setLocalSubTasks((prev) =>
         prev.map((s) => (s.id === subTaskId ? { ...s, isCompleted: current } : s))
       )
-
       console.error(error)
     }
   }
+
   const completedCount = localSubTasks.filter((s) => s.isCompleted).length
 
   async function handleColumnChange(newColumnId: string) {
@@ -75,13 +76,14 @@ export default function TaskDialogActions({
         body: JSON.stringify({ taskId, columnId: newColumnId })
       })
       if (res.ok) {
-        const data = await res.json()
-        changeTaskColumn(taskId, columnId, newColumnId, data.task)
+        // Let React Query refetch — the useEffect in Board will sync Zustand automatically
+        queryClient.invalidateQueries({ queryKey: ['columns', activeBoard?.id] })
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
+
   return (
     <FieldGroup>
       <FieldSet className="min-inline-0">
@@ -118,9 +120,8 @@ export default function TaskDialogActions({
             value={selectedColumnValue}
             onValueChange={(value) => {
               setSelectedColumnValue(value!)
-              const NewcolumnId = columns.find((column) => column.name === value)?.id
-
-              if (columnId != NewcolumnId) handleColumnChange(NewcolumnId!)
+              const newColumnId = columns.find((column) => column.name === value)?.id
+              if (columnId != newColumnId) handleColumnChange(newColumnId!)
             }}
           >
             <ComboboxInput className="w-full px-4 py-3 rounded-modal h-11.5 bg-kpanal" />

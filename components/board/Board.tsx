@@ -100,14 +100,14 @@ function Board() {
       })
   }
 
+  if (status === 'pending' || isLoading) {
+    return <div>Loading....</div>
+  }
+
   if (status === 'success' || !isLoading) {
     if (columns.length === 0) {
       return <div className="text-center mt-20 text-knetural-default">No columns found.</div>
     }
-  }
-
-  if (status === 'pending' || isLoading) {
-    return <div>Loading....</div>
   }
 
   return (

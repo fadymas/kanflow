@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useBoardStore } from '@/providers/board-store-provider'
+import { useQuery } from '@tanstack/react-query'
+import { Board } from '@/mocks/board.mock'
 
 import {
   DialogContent,
@@ -25,9 +27,17 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
   const queryClient = useQueryClient()
   const clearActiveBoard = useBoardStore((state) => state.clearActiveBoard)
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
-  const setBoards = useBoardStore((state) => state.setBoards)
-  const boards = useBoardStore((state) => state.boards)
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
+  const activeBoard = useBoardStore((state) => state.activeBoard)
+
+  const { data: boards = [] } = useQuery<Board[]>({
+    queryKey: ['boards'],
+    queryFn: () =>
+      fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`)
+        .then((res) => res.json())
+        .then((data) => data.boards ?? []),
+    enabled: type === 'Board'
+  })
 
   async function handleDelete() {
     setIsDeleting(true)
@@ -42,16 +52,19 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
 
       if (res.ok) {
         if (type === 'Board') {
+          // Invalidate boards cache — sidebar will refetch and show updated list
+          await queryClient.invalidateQueries({ queryKey: ['boards'] })
           const remaining = boards.filter((b) => b.id !== id)
-          setBoards(remaining)
           if (remaining.length > 0) {
             setActiveBoard(remaining[0].id, remaining[0].name)
           } else {
             clearActiveBoard()
           }
+          // Also invalidate columns since the board is gone
+          queryClient.invalidateQueries({ queryKey: ['columns'] })
         } else {
           setOpenTaskId(null)
-          queryClient.invalidateQueries({ queryKey: ['columns'] })
+          queryClient.invalidateQueries({ queryKey: ['columns', activeBoard?.id] })
         }
         openCallback()
       }
@@ -61,6 +74,7 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
       setIsDeleting(false)
     }
   }
+
   return (
     <DialogContent aria-describedby={undefined} className="bg-kpanal modal-content gap-8">
       <DialogHeader>
@@ -73,14 +87,12 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
       <DialogDescription className="line-clamp-3 text-ellipsis text-[16px] font-medium">
         {type === 'Board' &&
           `Are you sure you want to delete the "${deleted}" board? This action will remove all columns and tasks and cannot be reversed.`}
-
         {type === 'Task' &&
           `Are you sure you want to delete the "${deleted}" task? This action cannot be reversed.`}
-
         {type === 'Column' &&
           `Are you sure you want to delete the "${deleted}" column? This action will remove all tasks and cannot be reversed.`}
       </DialogDescription>
-      <DialogFooter className="justify-end gap-4 border-none bg-transparent ">
+      <DialogFooter className="justify-end gap-4 border-none bg-transparent">
         <Button
           variant="destructive"
           className="flex-1/2 h-13 px-6 py-4 rounded-full"
@@ -90,7 +102,7 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
           {isDeleting ? 'Deleting...' : 'Delete'}
         </Button>
         <Button
-          className="text-primary-DEFAULT bg-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-400 dark:bg-kbackground flex-1/2  h-13 px-6 py-4 rounded-full"
+          className="text-primary-DEFAULT bg-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-400 dark:bg-kbackground flex-1/2 h-13 px-6 py-4 rounded-full"
           disabled={isDeleting}
           onClick={() => openCallback()}
         >

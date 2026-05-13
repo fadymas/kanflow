@@ -45,3 +45,10 @@ export const createTaskSchema = z.object({
 })
 
 export type CreateTaskSchema = z.infer<typeof createTaskSchema>
+
+export const editTaskSchema = z.object({
+  title: z.string().trim().min(1, 'Task title is required'),
+  description: z.string().trim().min(1, 'Task description is required')
+})
+
+export type EditTaskSchema = z.infer<typeof editTaskSchema>

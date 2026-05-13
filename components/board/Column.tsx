@@ -7,7 +7,7 @@ import { Button } from '../ui/button'
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu'
 import CustomMenuContent from '../common/MenuContent'
 import { Droppable } from '@hello-pangea/dnd'
-import { Task } from '@/mocks/task.model'
+import { Task } from '@/mocks/task.mock'
 import { useState } from 'react'
 import ColumnDialog from '../dialogs/ColumnDialog'
 

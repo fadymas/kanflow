@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Draggable } from '@hello-pangea/dnd'
-import { Task } from '@/mocks/task.model'
+import { Task } from '@/mocks/task.mock'
 import { useBoardStore } from '@/providers/board-store-provider'
 
 interface TaskCardProps {

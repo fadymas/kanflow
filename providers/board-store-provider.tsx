@@ -2,20 +2,14 @@
 
 import { type ReactNode, createContext, useContext, useState } from 'react'
 import { useStore } from 'zustand'
-import { type BoardState, BoardStore, createBoardStore } from '@/stores/board-store'
+import { type BoardStore, createBoardStore } from '@/stores/board-store'
 
 export type BoardStoreApi = ReturnType<typeof createBoardStore>
 
 export const BoardStoreContext = createContext<BoardStoreApi | undefined>(undefined)
 
-export function BoardStoreProvider({
-  children,
-  initial
-}: {
-  children: ReactNode
-  initial?: BoardState
-}) {
-  const [store] = useState(() => createBoardStore(initial))
+export function BoardStoreProvider({ children }: { children: ReactNode }) {
+  const [store] = useState(() => createBoardStore())
   return <BoardStoreContext.Provider value={store}>{children}</BoardStoreContext.Provider>
 }
 

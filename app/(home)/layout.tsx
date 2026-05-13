@@ -16,30 +16,21 @@ async function layout({
 }>) {
   const cookieStore = await cookies()
   const sidebar_state = cookieStore.get('sidebar_state')?.value
-  const activeBoardId = cookieStore.get('active-boardId')?.value
-  const activeBoardName = cookieStore.get('active-boardName')?.value
 
   const user = await auth()
-  let data
-  let columns
+  let initialBoards: Board[] = []
+
   if (user.isAuthenticated) {
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
       headers: await headers()
     })
-    data = await res.json()
-    columns = data.boards?.find((board: Board) => board.id == Number(activeBoardId))?.Column
+    const data = await res.json()
+    initialBoards = data.boards ?? []
   }
 
   return (
-    <QueryProvider>
-      <BoardStoreProvider
-        initial={{
-          boards: data?.boards || [],
-          activeBoard: { id: Number(activeBoardId), name: activeBoardName },
-          columns: columns,
-          openTaskId: null
-        }}
-      >
+    <QueryProvider initialBoards={initialBoards}>
+      <BoardStoreProvider>
         <Header />
         <SidebarProvider
           defaultOpen={sidebar_state === 'true'}

@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import BoardDialog from '../dialogs/BoardDialog'
+import EditTaskDialog from '../dialogs/EditTaskDialog'
 import { Button } from '../ui/button'
 import { Dialog, DialogTrigger } from '../ui/dialog'
 import {
@@ -23,11 +24,17 @@ interface Props {
 function CustomDropdownMenu({ type, id, deleted }: Props) {
   const [openDelete, setOpenDelete] = useState(false)
   const [openAddBoard, setOpenAddBoard] = useState(false)
-  const [openRenameBoard, setOpenRenameBoard] = useState(false)
+  const [openEdit, setOpenEdit] = useState(false)
+  const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
 
   const activeBoard = useBoardStore((state) => state.activeBoard)
+  const columns = useBoardStore((state) => state.columns)
 
   const boardId = id ?? activeBoard?.id
+
+  // Find the task from Zustand columns so we can pre-fill the edit form
+  const task =
+    type === 'Task' ? columns.flatMap((col) => col.Task).find((t) => Number(t.id) === id) : null
 
   return (
     <>
@@ -53,15 +60,26 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
             </Dialog>
           )}
 
-          <Dialog open={openRenameBoard} onOpenChange={setOpenRenameBoard}>
+          <Dialog open={openEdit} onOpenChange={setOpenEdit}>
             <DialogTrigger asChild>
               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                 <PencilIcon className="size-4" />
                 {type === 'Board' ? 'Change Name' : 'Edit'}
               </DropdownMenuItem>
             </DialogTrigger>
-            {type === 'Board' && openRenameBoard && (
-              <BoardDialog editId={boardId} onSuccess={() => setOpenRenameBoard(false)} />
+            {type === 'Board' && openEdit && (
+              <BoardDialog editId={boardId} onSuccess={() => setOpenEdit(false)} />
+            )}
+            {type === 'Task' && openEdit && task && (
+              <EditTaskDialog
+                taskId={Number(task.id)}
+                title={task.title}
+                description={task.description ?? ''}
+                onSuccess={() => {
+                  setOpenEdit(false)
+                  setOpenTaskId(null)
+                }}
+              />
             )}
           </Dialog>
 
@@ -73,17 +91,12 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog
-        open={openDelete}
-        onOpenChange={() => {
-          setOpenDelete(!openDelete)
-        }}
-      >
+      <Dialog open={openDelete} onOpenChange={setOpenDelete}>
         <DeleteDialog
           type={type}
           id={id ? id : activeBoard?.id}
           deleted={deleted ? deleted : activeBoard?.name}
-          openCallback={() => setOpenDelete(!openDelete)}
+          openCallback={() => setOpenDelete(false)}
         />
       </Dialog>
     </>

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, XIcon } from 'lucide-react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
 import {
   createBoardSchema,
@@ -17,6 +18,8 @@ import { DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
 import { Input } from '../ui/input'
 import { useBoardStore } from '@/providers/board-store-provider'
+import { useQuery } from '@tanstack/react-query'
+import { Board } from '@/mocks/board.mock'
 
 interface Props {
   onSuccess: () => void
@@ -25,11 +28,18 @@ interface Props {
 
 function BoardDialog({ onSuccess, editId }: Props) {
   const isEditMode = Boolean(editId)
+  const queryClient = useQueryClient()
 
-  const boards = useBoardStore((state) => state.boards)
-  const setBoards = useBoardStore((state) => state.setBoards)
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
   const activeBoard = useBoardStore((state) => state.activeBoard)
+
+  const { data: boards = [] } = useQuery<Board[]>({
+    queryKey: ['boards'],
+    queryFn: () =>
+      fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`)
+        .then((res) => res.json())
+        .then((data) => data.boards ?? [])
+  })
 
   // ---- Create form ----
   const createForm = useForm<CreateBoardSchema>({
@@ -58,7 +68,6 @@ function BoardDialog({ onSuccess, editId }: Props) {
     name: 'columns'
   })
 
-  console.log('rendered')
   async function onSubmitCreate(values: CreateBoardSchema) {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
@@ -76,7 +85,8 @@ function BoardDialog({ onSuccess, editId }: Props) {
       const data = await res.json()
       createForm.reset()
       onSuccess()
-      setBoards([...boards, { id: data.board.id, name: data.board.name }])
+      // React Query is the source of truth — invalidate to refetch the updated list
+      await queryClient.invalidateQueries({ queryKey: ['boards'] })
       setActiveBoard(data.board.id, data.board.name)
     } catch (error) {
       console.error(error)
@@ -98,10 +108,12 @@ function BoardDialog({ onSuccess, editId }: Props) {
       }
 
       const data = await res.json()
-      setBoards(boards.map((b) => (b.id === values.boardId ? { ...b, name: data.board.name } : b)))
+      // Update active board name in Zustand if it's the one being renamed
       if (activeBoard?.id === values.boardId) {
         setActiveBoard(values.boardId, data.board.name)
       }
+      // React Query is the source of truth — invalidate to refetch the updated list
+      await queryClient.invalidateQueries({ queryKey: ['boards'] })
       editForm.reset()
       onSuccess()
     } catch (error) {
