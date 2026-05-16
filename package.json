@@ -14,6 +14,7 @@
     "@clerk/ui": "^1.6.3",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^5.2.2",
+    "@prisma/client": "^6.19.3",
     "@prisma/extension-accelerate": "^3.0.1",
     "@tanstack/react-query": "^5.99.0",
     "@tanstack/react-query-devtools": "^5.99.0",
@@ -25,6 +26,7 @@
     "lightswind": "^3.1.21",
     "lucide-react": "^0.577.0",
     "next": "^16.2.3",
+    "prisma": "^6.19.3",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -37,7 +39,6 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@prisma/client": "^7.7.0",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/eslint-plugin-query": "^5.99.0",
@@ -51,7 +52,6 @@
     "eslint-config-prettier": "^10.1.8",
     "i": "^0.3.7",
     "npm": "^11.12.1",
-    "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

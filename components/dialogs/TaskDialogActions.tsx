@@ -13,6 +13,7 @@ import {
 import { Subtask } from '@/mocks/task.mock'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { useQueryClient } from '@tanstack/react-query'
+import { Columndb } from '@/mocks/column.mock'
 
 export default function TaskDialogActions({
   subTasks,
@@ -23,11 +24,15 @@ export default function TaskDialogActions({
   columnId: string
   taskId: string
 }) {
-  const columns = useBoardStore((state) => state.columns)
-  const activeBoard = useBoardStore((state) => state.activeBoard)
+  const activeBoardID = useBoardStore((state) => state.activeBoardID)
   const queryClient = useQueryClient()
 
+  const queryKey = ['columns', activeBoardID]
+
+  // Read columns directly from React Query cache
+  const columns = queryClient.getQueryData<Columndb[]>(queryKey) ?? []
   const taskCurrentColumn = columns.find((column) => column.id == columnId)
+
   const [localSubTasks, setLocalSubTasks] = useState(subTasks)
   const [selectedColumnValue, setSelectedColumnValue] = useState(taskCurrentColumn?.name || '')
 
@@ -38,9 +43,27 @@ export default function TaskDialogActions({
   async function handleToggle(subTaskId: string, current: boolean) {
     const next = !current
 
-    // Optimistic update
+    // ── Snapshot for rollback ────────────────────────────────────────────
+    const previousColumns = queryClient.getQueryData<Columndb[]>(queryKey)
+
+    // ── Optimistic: update checkbox + task card subtask count ────────────
     setLocalSubTasks((prev) =>
       prev.map((s) => (s.id === subTaskId ? { ...s, isCompleted: next } : s))
+    )
+    queryClient.setQueryData<Columndb[]>(queryKey, (old) =>
+      old?.map((col) => ({
+        ...col,
+        Task: col.Task.map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                SubTask: t.SubTask.map((s: Subtask) =>
+                  s.id === subTaskId ? { ...s, isCompleted: next } : s
+                )
+              }
+            : t
+        )
+      }))
     )
 
     try {
@@ -51,17 +74,20 @@ export default function TaskDialogActions({
       })
 
       if (!res.ok) {
+        // ── Rollback ─────────────────────────────────────────────────────
         setLocalSubTasks((prev) =>
           prev.map((s) => (s.id === subTaskId ? { ...s, isCompleted: current } : s))
         )
+        queryClient.setQueryData(queryKey, previousColumns)
         console.error('Failed to update subtask')
       } else {
-        queryClient.invalidateQueries({ queryKey: ['columns', activeBoard?.id] })
+        queryClient.invalidateQueries({ queryKey })
       }
     } catch (error) {
       setLocalSubTasks((prev) =>
         prev.map((s) => (s.id === subTaskId ? { ...s, isCompleted: current } : s))
       )
+      queryClient.setQueryData(queryKey, previousColumns)
       console.error(error)
     }
   }
@@ -69,6 +95,26 @@ export default function TaskDialogActions({
   const completedCount = localSubTasks.filter((s) => s.isCompleted).length
 
   async function handleColumnChange(newColumnId: string) {
+    // ── Snapshot for rollback ────────────────────────────────────────────
+    const previousColumns = queryClient.getQueryData<Columndb[]>(queryKey)
+    const previousColumnName = selectedColumnValue
+
+    // ── Optimistic: move task to target column in cache ──────────────────
+    queryClient.setQueryData<Columndb[]>(queryKey, (old) => {
+      if (!old) return old
+      const task = old.flatMap((col) => col.Task).find((t) => t.id === taskId)
+      if (!task) return old
+      return old.map((col) => {
+        if (col.id == columnId) {
+          return { ...col, Task: col.Task.filter((t) => t.id !== taskId) }
+        }
+        if (col.id == newColumnId) {
+          return { ...col, Task: [...col.Task, { ...task, columnId: newColumnId }] }
+        }
+        return col
+      })
+    })
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks/move`, {
         method: 'PATCH',
@@ -76,10 +122,15 @@ export default function TaskDialogActions({
         body: JSON.stringify({ taskId, columnId: newColumnId })
       })
       if (res.ok) {
-        // Let React Query refetch — the useEffect in Board will sync Zustand automatically
-        queryClient.invalidateQueries({ queryKey: ['columns', activeBoard?.id] })
+        queryClient.invalidateQueries({ queryKey })
+      } else {
+        // ── Rollback ─────────────────────────────────────────────────────
+        queryClient.setQueryData(queryKey, previousColumns)
+        setSelectedColumnValue(previousColumnName)
       }
     } catch (error) {
+      queryClient.setQueryData(queryKey, previousColumns)
+      setSelectedColumnValue(previousColumnName)
       console.error(error)
     }
   }

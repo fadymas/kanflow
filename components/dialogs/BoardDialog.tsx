@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -23,7 +24,7 @@ import { Board } from '@/mocks/board.mock'
 
 interface Props {
   onSuccess: () => void
-  editId?: number
+  editId?: number | null
 }
 
 function BoardDialog({ onSuccess, editId }: Props) {
@@ -31,7 +32,7 @@ function BoardDialog({ onSuccess, editId }: Props) {
   const queryClient = useQueryClient()
 
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
-  const activeBoard = useBoardStore((state) => state.activeBoard)
+  const activeBoardID = useBoardStore((state) => state.activeBoardID)
 
   const { data: boards = [] } = useQuery<Board[]>({
     queryKey: ['boards'],
@@ -50,7 +51,7 @@ function BoardDialog({ onSuccess, editId }: Props) {
   // ---- Edit form ----
   const editForm = useForm<RenameBoardSchema>({
     resolver: zodResolver(renameBoardSchema),
-    defaultValues: { boardId: editId, name: '' }
+    defaultValues: { boardId: editId!, name: '' }
   })
 
   useEffect(() => {
@@ -88,6 +89,8 @@ function BoardDialog({ onSuccess, editId }: Props) {
       // React Query is the source of truth — invalidate to refetch the updated list
       await queryClient.invalidateQueries({ queryKey: ['boards'] })
       setActiveBoard(data.board.id, data.board.name)
+      document.cookie = `active-boardId=${data.board.id}`
+      document.cookie = `active-boardName=${data.board.name}`
     } catch (error) {
       console.error(error)
     }
@@ -109,7 +112,7 @@ function BoardDialog({ onSuccess, editId }: Props) {
 
       const data = await res.json()
       // Update active board name in Zustand if it's the one being renamed
-      if (activeBoard?.id === values.boardId) {
+      if (activeBoardID === values.boardId) {
         setActiveBoard(values.boardId, data.board.name)
       }
       // React Query is the source of truth — invalidate to refetch the updated list

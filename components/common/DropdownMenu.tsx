@@ -14,6 +14,8 @@ import {
 import { EllipsisVertical, PencilIcon, Plus, TrashIcon } from 'lucide-react'
 import { useBoardStore } from '@/providers/board-store-provider'
 import DeleteDialog from '../dialogs/DeleteDialog'
+import { useQueryClient } from '@tanstack/react-query'
+import { Columndb } from '@/mocks/column.mock'
 
 interface Props {
   type: 'Board' | 'Task'
@@ -26,13 +28,17 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
   const [openAddBoard, setOpenAddBoard] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
+  const activeBoardId = useBoardStore((state) => state.activeBoardID)
+  const activeBoardName = useBoardStore((state) => state.activeBoardName)
+  const queryClient = useQueryClient()
 
-  const activeBoard = useBoardStore((state) => state.activeBoard)
-  const columns = useBoardStore((state) => state.columns)
+  const boardId = id ?? activeBoardId
 
-  const boardId = id ?? activeBoard?.id
-
-  // Find the task from Zustand columns so we can pre-fill the edit form
+  if (type == 'Board' && !boardId) {
+    return null
+  }
+  // Read task from React Query cache — no Zustand columns needed
+  const columns = queryClient.getQueryData<Columndb[]>(['columns', activeBoardId]) ?? []
   const task =
     type === 'Task' ? columns.flatMap((col) => col.Task).find((t) => Number(t.id) === id) : null
 
@@ -68,7 +74,12 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
               </DropdownMenuItem>
             </DialogTrigger>
             {type === 'Board' && openEdit && (
-              <BoardDialog editId={boardId} onSuccess={() => setOpenEdit(false)} />
+              <BoardDialog
+                editId={boardId}
+                onSuccess={() => {
+                  setOpenEdit(false)
+                }}
+              />
             )}
             {type === 'Task' && openEdit && task && (
               <EditTaskDialog
@@ -84,7 +95,7 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
           </Dialog>
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onSelect={() => setOpenDelete(!openDelete)}>
+          <DropdownMenuItem variant="destructive" onSelect={() => setOpenDelete(true)}>
             <TrashIcon className="size-4" />
             Delete
           </DropdownMenuItem>
@@ -94,8 +105,8 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
         <DeleteDialog
           type={type}
-          id={id ? id : activeBoard?.id}
-          deleted={deleted ? deleted : activeBoard?.name}
+          id={id ? id : activeBoardId!}
+          deleted={deleted ? deleted : activeBoardName!}
           openCallback={() => setOpenDelete(false)}
         />
       </Dialog>

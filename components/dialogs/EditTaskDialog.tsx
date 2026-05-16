@@ -21,7 +21,7 @@ interface Props {
 
 function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
   const queryClient = useQueryClient()
-  const activeBoard = useBoardStore((state) => state.activeBoard)
+  const activeBoardID = useBoardStore((state) => state.activeBoardID)
 
   const form = useForm<EditTaskSchema>({
     resolver: zodResolver(editTaskSchema),
@@ -44,7 +44,7 @@ function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
         return
       }
 
-      await queryClient.invalidateQueries({ queryKey: ['columns', activeBoard?.id] })
+      await queryClient.invalidateQueries({ queryKey: ['columns', activeBoardID] })
       onSuccess()
     } catch (error) {
       console.error(error)

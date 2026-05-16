@@ -1,4 +1,4 @@
-import { Task } from './task.model'
+import { Task } from './task.mock'
 
 export type Columndb = {
   id: string

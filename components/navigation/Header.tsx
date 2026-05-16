@@ -3,7 +3,7 @@ import { Button } from '../ui/button'
 // import MobileNavMenu from './MobileNavMenu'
 import CustomDropdownMenu from '../common/DropdownMenu'
 import { Show, SignInButton, SignUpButton } from '@clerk/nextjs'
-import CreateTask from '../dialogs/CreateTaskDialog'
+import CreateTask from '../dialogs/CreateTask'
 
 async function Header() {
   return (

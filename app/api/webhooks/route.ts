@@ -9,7 +9,6 @@ export async function POST(req: NextRequest) {
     const eventType = evt.type
 
     console.log(`Received webhook with ID ${id} and event type of ${eventType}`)
-
     switch (eventType) {
       case 'user.created':
         await handleUserCreated(evt.data)

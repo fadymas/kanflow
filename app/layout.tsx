@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
-import { Suspense } from 'react'
 import { ClerkProvider } from '@clerk/nextjs'
 import { shadcn } from '@clerk/ui/themes'
 import { ui } from '@clerk/ui'
 import { Plus_Jakarta_Sans } from 'next/font/google'
-import ThemeLayout from '@/components/common/ThemeLayout'
 import './globals.css'
+
+import { cookies } from 'next/headers'
+
+import { ThemeProvider } from 'theme-handler'
 
 export const metadata: Metadata = {
   title: 'Kanban Task Management',
@@ -23,6 +25,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const cookieStore = await cookies()
+  const theme = cookieStore.get('theme')?.value
+
   return (
     <html
       lang="en"
@@ -31,11 +36,9 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen k-background">
-        <Suspense fallback={<div>Loading...</div>}>
-          <ClerkProvider appearance={shadcn} ui={ui}>
-            <ThemeLayout>{children}</ThemeLayout>
-          </ClerkProvider>
-        </Suspense>
+        <ClerkProvider appearance={shadcn} ui={ui}>
+          <ThemeProvider theme={theme ?? 'light'}>{children}</ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   )

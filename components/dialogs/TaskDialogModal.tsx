@@ -9,14 +9,18 @@ import {
 import TaskDialogActions from './TaskDialogActions'
 import DropdownMenu from '../common/DropdownMenu'
 import { useBoardStore } from '@/providers/board-store-provider'
+import { useQueryClient } from '@tanstack/react-query'
+import { Columndb } from '@/mocks/column.mock'
 
 export default function TaskDialogModal() {
   const openTaskId = useBoardStore((state) => state.openTaskId)
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
-  const columns = useBoardStore((state) => state.columns)
+  const activeBoardID = useBoardStore((state) => state.activeBoardID)
+  const queryClient = useQueryClient()
 
-  // Find the task in the store
-  const task = columns?.flatMap((col) => col.Task).find((t) => t?.id === openTaskId)
+  // Read task directly from React Query cache — no Zustand columns needed
+  const columns = queryClient.getQueryData<Columndb[]>(['columns', activeBoardID]) ?? []
+  const task = columns.flatMap((col) => col.Task).find((t) => t?.id === openTaskId)
 
   if (!task) return null
 
@@ -35,7 +39,7 @@ export default function TaskDialogModal() {
             <DropdownMenu deleted={task.title} type="Task" id={Number(task.id)} />
           </div>
         </DialogHeader>
-        <DialogDescription className="text-[14px] text-kdescription  line-clamp-3 text-ellipsis">
+        <DialogDescription className="text-[14px] text-kdescription line-clamp-3 text-ellipsis">
           {task.description}
         </DialogDescription>
         <TaskDialogActions taskId={task.id} subTasks={task.SubTask} columnId={task.columnId} />

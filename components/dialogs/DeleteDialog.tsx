@@ -28,7 +28,7 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
   const clearActiveBoard = useBoardStore((state) => state.clearActiveBoard)
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
-  const activeBoard = useBoardStore((state) => state.activeBoard)
+  const activeBoard = useBoardStore((state) => state.activeBoardID)
 
   const { data: boards = [] } = useQuery<Board[]>({
     queryKey: ['boards'],
@@ -53,18 +53,24 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
       if (res.ok) {
         if (type === 'Board') {
           // Invalidate boards cache — sidebar will refetch and show updated list
-          await queryClient.invalidateQueries({ queryKey: ['boards'] })
           const remaining = boards.filter((b) => b.id !== id)
           if (remaining.length > 0) {
             setActiveBoard(remaining[0].id, remaining[0].name)
+
+            document.cookie = `active-boardId=${remaining[0].id}`
+            document.cookie = `active-boardName=${remaining[0].name}`
           } else {
             clearActiveBoard()
+            document.cookie = `active-boardId=null`
+            document.cookie = `active-boardName=null`
           }
+          await queryClient.invalidateQueries({ queryKey: ['boards'] })
+
           // Also invalidate columns since the board is gone
           queryClient.invalidateQueries({ queryKey: ['columns'] })
         } else {
           setOpenTaskId(null)
-          queryClient.invalidateQueries({ queryKey: ['columns', activeBoard?.id] })
+          queryClient.invalidateQueries({ queryKey: ['columns', activeBoard] })
         }
         openCallback()
       }

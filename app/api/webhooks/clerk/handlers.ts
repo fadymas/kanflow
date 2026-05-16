@@ -1,39 +1,46 @@
 import { extractEmail, extractName, extractImageUrl } from '@/app/api/webhooks/clerk/helpers'
 import { UserJSON } from '@clerk/nextjs/server'
+import { prisma } from '@/lib/prisma'
 
-const BASE_URL = process.env.NEXT_PUBLIC_URL
+type UserDeletedJson = { id?: string }
 
 export async function handleUserCreated(data: UserJSON) {
-  await fetch(`${BASE_URL}/api/users`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      clerkId: data.id,
-      email: extractEmail(data),
-      name: extractName(data),
-      imageUrl: extractImageUrl(data)
-    })
+  const clerkId = data.id
+  const email = extractEmail(data)
+  const name = extractName(data)
+  const imageUrl = extractImageUrl(data)
+
+  const existing = await prisma.user.findFirst({
+    where: { OR: [{ clerkId }, ...(email ? [{ email }] : [])] }
   })
+
+  if (existing && existing.clerkId === clerkId && existing.email === email) return
+
+  await prisma.user.create({ data: { clerkId, email, name, imageUrl } })
 }
 
 export async function handleUserUpdated(data: UserJSON) {
-  await fetch(`${BASE_URL}/api/users`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      clerkId: data.id,
-      email: extractEmail(data),
-      name: extractName(data),
-      imageUrl: extractImageUrl(data)
-    })
+  const clerkId = data.id
+  const email = extractEmail(data)
+  const name = extractName(data)
+  const imageUrl = extractImageUrl(data)
+
+  const existing = await prisma.user.findFirst({
+    where: { OR: [{ clerkId }, ...(email ? [{ email }] : [])] }
+  })
+
+  if (!existing) {
+    await prisma.user.create({ data: { clerkId, email, name, imageUrl } })
+    return
+  }
+
+  await prisma.user.update({
+    where: { id: existing.id },
+    data: { clerkId, email, name, imageUrl }
   })
 }
 
 export async function handleUserDeleted(data: UserDeletedJson) {
   if (!data.id) return
-  await fetch(`${BASE_URL}/api/users`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ clerkId: data.id })
-  })
+  await prisma.user.delete({ where: { clerkId: data.id } })
 }

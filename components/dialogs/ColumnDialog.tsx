@@ -18,6 +18,7 @@ import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from
 import { Input } from '../ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group'
+import { Columndb } from '@/mocks/column.mock'
 
 interface Props {
   onSuccess?: () => void
@@ -26,11 +27,11 @@ interface Props {
 
 function ColumnDialog({ onSuccess, editId }: Props) {
   const isEditMode = Boolean(editId)
-  const activeBoardId = useBoardStore((state) => state.activeBoard?.id)
+  const activeBoardId = useBoardStore((state) => state.activeBoardID)
   const queryClient = useQueryClient()
 
-  const columns = useBoardStore((state) => state.columns)
-  const existingColumn = columns.find((column) => column.id == editId)
+  const columns = queryClient.getQueryData(['columns', activeBoardId]) as Columndb[] | undefined
+  const existingColumn = columns?.find((column) => column.id == editId)
   const form = useForm<CreateColumnSchema>({
     resolver: zodResolver(createColumnSchema),
     defaultValues: {

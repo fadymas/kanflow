@@ -1,34 +1,37 @@
 'use client'
 import { DragDropContext, DropResult } from '@hello-pangea/dnd'
-import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import Column from './Column'
 import TaskDialogModal from '../dialogs/TaskDialogModal'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { Columndb } from '@/mocks/column.mock'
 
 function Board() {
-  const activeBoard = useBoardStore((s) => s.activeBoard)
-  const setColumns = useBoardStore((s) => s.setColumns)
-  const storedColumns = useBoardStore((s) => s.columns)
+  const activeBoard = useBoardStore((s) => s.activeBoardID) || -1
   const queryClient = useQueryClient()
 
+  const queryKey = ['columns', activeBoard]
   const {
-    data: columns = [],
+    data: serverColumns = [],
     isLoading,
     status
-  } = useQuery({
-    queryKey: ['columns', activeBoard?.id],
+  } = useQuery<Columndb[]>({
+    queryKey,
     queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns?boardId=${activeBoard?.id}`)
+      fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns?boardId=${activeBoard}`)
         .then((res) => res.json())
         .then((data) => data.columns ?? []),
-    enabled: !!activeBoard?.id
+    enabled: !!activeBoard
   })
 
+  // Local state drives rendering — instant drag updates with no re-render delay
+  const [columns, setColumns] = useState<Columndb[]>(serverColumns)
+
+  // Keep local state in sync when server data changes (board switch, initial load)
   useEffect(() => {
-    setColumns(columns)
-  }, [columns, setColumns])
+    setColumns(serverColumns)
+  }, [serverColumns])
 
   function onDragEnd(result: DropResult) {
     if (
@@ -44,39 +47,41 @@ function Board() {
 
     if (isSameColumn && samePosition) return
 
+    const sourceIndex = result.source.index // 0-based
+    const destinationIndex = result.destination.index // 0-based
+
     // ── Snapshot for rollback ────────────────────────────────────────────
-    const previousColumns = storedColumns
+    const previousColumns = columns
 
     // ── Compute next state ───────────────────────────────────────────────
-    const nextColumns = storedColumns.map((col) => {
+    const nextColumns = columns.map((col) => {
       if (isSameColumn) {
         if (col.id == result.source.droppableId) {
           const newTasks = Array.from(col.Task)
-          const [movedTask] = newTasks.splice(result.source.index - 1, 1)
-          newTasks.splice(result.destination!.index - 1, 0, movedTask)
+          const [movedTask] = newTasks.splice(sourceIndex, 1)
+          newTasks.splice(destinationIndex, 0, movedTask)
           return { ...col, Task: newTasks.map((t, i) => ({ ...t, position: i + 1 })) }
         }
       } else {
         if (col.id == result.source.droppableId) {
           const newTasks = Array.from(col.Task)
-          newTasks.splice(result.source.index - 1, 1)
+          newTasks.splice(sourceIndex, 1)
           return { ...col, Task: newTasks.map((t, i) => ({ ...t, position: i + 1 })) }
         }
         if (col.id == result.destination?.droppableId) {
-          const sourceCol = storedColumns.find((c) => c.id == result.source.droppableId)
-          const movedTask = sourceCol?.Task[result.source.index - 1]
+          const sourceCol = columns.find((c) => c.id == result.source.droppableId)
+          const movedTask = sourceCol?.Task[sourceIndex]
           if (!movedTask) return col
           const newTasks = Array.from(col.Task)
-          newTasks.splice(result.destination!.index - 1, 0, { ...movedTask })
+          newTasks.splice(destinationIndex, 0, { ...movedTask })
           return { ...col, Task: newTasks.map((t, i) => ({ ...t, position: i + 1 })) }
         }
       }
       return col
     })
 
-    // ── Optimistic update: synchronous, no render cycle delay ────────────
-    setColumns(nextColumns as Columndb[])
-    queryClient.setQueryData(['columns', activeBoard?.id], nextColumns)
+    // ── Instant local update ─────────────────────────────────────────────
+    setColumns(nextColumns)
 
     // ── API call ─────────────────────────────────────────────────────────
     fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks/drag`, {
@@ -86,35 +91,34 @@ function Board() {
         taskId: result.draggableId,
         sourceColumnId: result.source.droppableId,
         targetColumnId: result.destination.droppableId,
-        oldPosition: result.source.index,
-        newPosition: result.destination.index
+        oldPosition: sourceIndex + 1,
+        newPosition: destinationIndex + 1
       })
     })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to drag task')
+        // Sync local state into React Query cache so other consumers stay consistent
+        queryClient.setQueryData(queryKey, nextColumns)
       })
       .catch(() => {
-        // ── Rollback ─────────────────────────────────────────────────────
+        // Rollback on failure
         setColumns(previousColumns)
-        queryClient.setQueryData(['columns', activeBoard?.id], previousColumns)
       })
   }
 
-  if (status === 'pending' || isLoading) {
-    return <div>Loading....</div>
+  if (activeBoard === -1) {
+    return <div>No active board selected</div>
   }
 
-  if (status === 'success' || !isLoading) {
-    if (columns.length === 0) {
-      return <div className="text-center mt-20 text-knetural-default">No columns found.</div>
-    }
+  if ((isLoading && status === 'pending') || columns.length === 0) {
+    return <div>Loading...</div>
   }
 
   return (
     <>
       <TaskDialogModal />
       <DragDropContext onDragEnd={onDragEnd}>
-        {storedColumns.map((column: Columndb) => (
+        {columns.map((column: Columndb) => (
           <Column
             key={column.id}
             id={column.id}

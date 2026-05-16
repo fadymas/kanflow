@@ -7,7 +7,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const clerkId = body.clerkId?.trim()
     if (!clerkId) return NextResponse.json({ error: 'clerkId is required' }, { status: 400 })
-
     const email = body.email?.trim().toLowerCase() || null
     const name = body.name?.trim() || null
     const imageUrl = body.imageUrl?.trim() || null
@@ -21,6 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await prisma.user.create({ data: { clerkId, email, name, imageUrl } })
+
     return NextResponse.json({ user }, { status: 201 })
   } catch (error) {
     console.error('Failed to create user:', error)

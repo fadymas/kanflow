@@ -27,50 +27,50 @@ export async function PATCH(req: NextRequest) {
     const oldPosition = Number(body.oldPosition)
     const newPosition = Number(body.newPosition) || 1
 
-    // Verify task ownership and that it actually lives in the stated source column
-    const task = await prisma.task.findFirst({
-      where: { id: taskId },
-      include: { Column: { include: { Board: true } } }
-    })
+    const isSameColumn = sourceColumnId === targetColumnId
+
+    // Single query: verify ownership, source column, and (if cross-column) target column same board
+    const [task, targetColumn] = await Promise.all([
+      prisma.task.findUnique({
+        where: { id: taskId },
+        select: {
+          id: true,
+          columnId: true,
+          Column: {
+            select: {
+              boardId: true,
+              Board: { select: { ownerId: true } }
+            }
+          }
+        }
+      }),
+      isSameColumn
+        ? Promise.resolve(null)
+        : prisma.column.findUnique({
+            where: { id: targetColumnId },
+            select: { id: true, boardId: true }
+          })
+    ])
+
     if (!task || task.Column?.Board?.ownerId !== user.id)
       return NextResponse.json({ error: 'Task not found' }, { status: 404 })
 
-    if (task.columnId !== sourceColumnId)
-      return NextResponse.json(
-        { error: "sourceColumnId does not match task's current column" },
-        { status: 400 }
-      )
-
-    // Fetch both columns and verify they belong to the same board owned by the user
-    const [sourceColumn, targetColumn] = await Promise.all([
-      prisma.column.findFirst({ where: { id: sourceColumnId }, include: { Board: true } }),
-      prisma.column.findFirst({ where: { id: targetColumnId }, include: { Board: true } })
-    ])
-
-    if (!sourceColumn || sourceColumn.Board?.ownerId !== user.id)
-      return NextResponse.json({ error: 'Source column not found' }, { status: 404 })
-
-    if (!targetColumn || targetColumn.Board?.ownerId !== user.id)
-      return NextResponse.json({ error: 'Target column not found' }, { status: 404 })
-
-    if (sourceColumn.boardId !== targetColumn.boardId)
-      return NextResponse.json({ error: 'Columns must belong to the same board' }, { status: 400 })
-
-    const isSameColumn = sourceColumnId === targetColumnId
+    if (!isSameColumn) {
+      if (!targetColumn)
+        return NextResponse.json({ error: 'Target column not found' }, { status: 404 })
+      if (targetColumn.boardId !== task.Column!.boardId)
+        return NextResponse.json({ error: 'Columns must belong to same board' }, { status: 400 })
+    }
 
     let updated
 
     if (isSameColumn) {
-      // ── Same-column reorder ──────────────────────────────────────────────
-      // Moving DOWN (e.g. position 2 → 5): tasks between old+1 and new shift up (decrement)
-      // Moving UP   (e.g. position 5 → 2): tasks between new and old-1 shift down (increment)
       const movingDown = newPosition > oldPosition
 
       ;[updated] = await prisma.$transaction([
         prisma.task.update({
           where: { id: taskId },
-          data: { position: newPosition, updated_at: new Date() },
-          include: { SubTask: true }
+          data: { position: newPosition, updated_at: new Date() }
         }),
         prisma.task.updateMany({
           where: {
@@ -84,14 +84,10 @@ export async function PATCH(req: NextRequest) {
         })
       ])
     } else {
-      // ── Cross-column move ────────────────────────────────────────────────
-      // Source: tasks after oldPosition shift up (decrement)
-      // Target: tasks at or after newPosition shift down (increment) to make room
       ;[updated] = await prisma.$transaction([
         prisma.task.update({
           where: { id: taskId },
-          data: { columnId: targetColumnId, position: newPosition, updated_at: new Date() },
-          include: { SubTask: true }
+          data: { columnId: targetColumnId, position: newPosition, updated_at: new Date() }
         }),
         prisma.task.updateMany({
           where: {

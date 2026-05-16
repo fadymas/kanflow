@@ -31,9 +31,8 @@ function CustomSidebar() {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  const activeBoardId = useBoardStore((state) => state.activeBoard?.id)
+  const activeBoardId = useBoardStore((state) => state.activeBoardID)
   const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
-  const activeBoard = useBoardStore((state) => state.activeBoard)
 
   const { data: boards = [] } = useQuery<Board[]>({
     queryKey: ['boards'],
@@ -45,10 +44,10 @@ function CustomSidebar() {
 
   // Guard: if persisted activeBoardId no longer exists in boards, clear it
   useEffect(() => {
-    if (boards.length > 0 && activeBoard?.id && !boards.find((b) => b.id === activeBoard.id)) {
+    if (boards.length > 0 && activeBoardId && !boards.find((b) => b.id === activeBoardId)) {
       setActiveBoardId(boards[0].id, boards[0].name)
     }
-  }, [boards, activeBoard?.id, setActiveBoardId])
+  }, [boards, activeBoardId, setActiveBoardId])
 
   useEffect(() => {
     setMounted(true)
@@ -131,7 +130,7 @@ function CustomSidebar() {
                   <SidebarMenuButton asChild>
                     <div
                       className={cn(
-                        'w-full flex justify-center h-20',
+                        'w-full flex justify-center h-22',
                         state === 'collapsed' && !isMobile ? '' : 'userButton'
                       )}
                     >
@@ -140,8 +139,8 @@ function CustomSidebar() {
                       ) : (
                         <div
                           className={cn(
-                            'w-full flex justify-center size-5.25! bg-black rounded-full',
-                            state === 'collapsed' && !isMobile ? '' : 'size-20!'
+                            'w-full flex justify-center size-5.25! bg-black rounded-full py-0!',
+                            state === 'collapsed' && !isMobile ? '' : 'size-22!'
                           )}
                         />
                       )}
