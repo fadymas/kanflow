@@ -25,7 +25,8 @@ export async function GET(req: NextRequest) {
         name: true,
         color: true,
         position: true,
-        Task: { orderBy: { position: 'asc' }, include: { SubTask: true } }
+        Task: { orderBy: { position: 'asc' }, include: { SubTask: true } },
+        boardId: true
       },
       orderBy: { position: 'asc' }
     })

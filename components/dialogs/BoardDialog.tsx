@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/immutability */
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,8 +18,8 @@ import { DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
 import { Input } from '../ui/input'
 import { useBoardStore } from '@/providers/board-store-provider'
-import { useQuery } from '@tanstack/react-query'
 import { Board } from '@/mocks/board.mock'
+import { useSidebar } from '../ui/sidebar'
 
 interface Props {
   onSuccess: () => void
@@ -30,17 +29,12 @@ interface Props {
 function BoardDialog({ onSuccess, editId }: Props) {
   const isEditMode = Boolean(editId)
   const queryClient = useQueryClient()
-
+  const { setOpenMobile } = useSidebar()
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
   const activeBoardID = useBoardStore((state) => state.activeBoardID)
 
-  const { data: boards = [] } = useQuery<Board[]>({
-    queryKey: ['boards'],
-    queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`)
-        .then((res) => res.json())
-        .then((data) => data.boards ?? [])
-  })
+  // Read directly from cache — no extra useQuery needed
+  const boards = queryClient.getQueryData<Board[]>(['boards']) ?? []
 
   // ---- Create form ----
   const createForm = useForm<CreateBoardSchema>({
@@ -59,7 +53,8 @@ function BoardDialog({ onSuccess, editId }: Props) {
       const board = boards.find((b) => b.id === editId)
       editForm.reset({ boardId: editId, name: board?.name ?? '' })
     }
-  }, [isEditMode, editId, boards, editForm])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode, editId])
 
   const form = isEditMode ? editForm : createForm
   const { isSubmitting } = form.formState
@@ -70,6 +65,20 @@ function BoardDialog({ onSuccess, editId }: Props) {
   })
 
   async function onSubmitCreate(values: CreateBoardSchema) {
+    const previousBoards = queryClient.getQueryData<Board[]>(['boards']) ?? []
+
+    // --- OPTIMISTIC: append a temp board ---
+    const tempBoard: Board = {
+      id: Date.now(), // negative temp id to avoid collisions
+      name: values.name,
+      ownerId: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    queryClient.setQueryData<Board[]>(['boards'], [...previousBoards, tempBoard])
+    createForm.reset()
+    onSuccess()
+    setOpenMobile(false)
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
         method: 'POST',
@@ -78,25 +87,38 @@ function BoardDialog({ onSuccess, editId }: Props) {
       })
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        console.error('Failed to create board:', data)
+        queryClient.setQueryData<Board[]>(['boards'], previousBoards)
+        console.error('Failed to create board:', await res.json().catch(() => ({})))
         return
       }
 
       const data = await res.json()
-      createForm.reset()
-      onSuccess()
-      // React Query is the source of truth — invalidate to refetch the updated list
-      await queryClient.invalidateQueries({ queryKey: ['boards'] })
+      // Replace temp with real board
+      queryClient.setQueryData<Board[]>(['boards'], [...previousBoards, data.board])
       setActiveBoard(data.board.id, data.board.name)
       document.cookie = `active-boardId=${data.board.id}`
       document.cookie = `active-boardName=${data.board.name}`
     } catch (error) {
+      queryClient.setQueryData<Board[]>(['boards'], previousBoards)
       console.error(error)
     }
   }
 
   async function onSubmitEdit(values: RenameBoardSchema) {
+    const previousBoards = queryClient.getQueryData<Board[]>(['boards']) ?? []
+
+    // --- OPTIMISTIC: update name in cache ---
+    queryClient.setQueryData<Board[]>(
+      ['boards'],
+      previousBoards.map((b) => (b.id === values.boardId ? { ...b, name: values.name } : b))
+    )
+    if (activeBoardID === values.boardId) {
+      setActiveBoard(values.boardId, values.name)
+    }
+
+    editForm.reset()
+    onSuccess()
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
         method: 'PATCH',
@@ -105,21 +127,23 @@ function BoardDialog({ onSuccess, editId }: Props) {
       })
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        console.error('Failed to rename board:', data)
+        queryClient.setQueryData<Board[]>(['boards'], previousBoards)
+        if (activeBoardID === values.boardId) {
+          const original = previousBoards.find((b) => b.id === values.boardId)
+          if (original) setActiveBoard(original.id, original.name)
+        }
+        console.error('Failed to rename board:', await res.json().catch(() => ({})))
         return
       }
 
-      const data = await res.json()
-      // Update active board name in Zustand if it's the one being renamed
-      if (activeBoardID === values.boardId) {
-        setActiveBoard(values.boardId, data.board.name)
-      }
-      // React Query is the source of truth — invalidate to refetch the updated list
+      // Confirmed — invalidate to get fresh server data
       await queryClient.invalidateQueries({ queryKey: ['boards'] })
-      editForm.reset()
-      onSuccess()
     } catch (error) {
+      queryClient.setQueryData<Board[]>(['boards'], previousBoards)
+      if (activeBoardID === values.boardId) {
+        const original = previousBoards.find((b) => b.id === values.boardId)
+        if (original) setActiveBoard(original.id, original.name)
+      }
       console.error(error)
     }
   }

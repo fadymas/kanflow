@@ -14,8 +14,6 @@ import {
 import { EllipsisVertical, PencilIcon, Plus, TrashIcon } from 'lucide-react'
 import { useBoardStore } from '@/providers/board-store-provider'
 import DeleteDialog from '../dialogs/DeleteDialog'
-import { useQueryClient } from '@tanstack/react-query'
-import { Columndb } from '@/mocks/column.mock'
 
 interface Props {
   type: 'Board' | 'Task'
@@ -27,10 +25,11 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
   const [openDelete, setOpenDelete] = useState(false)
   const [openAddBoard, setOpenAddBoard] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
+
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
   const activeBoardId = useBoardStore((state) => state.activeBoardID)
   const activeBoardName = useBoardStore((state) => state.activeBoardName)
-  const queryClient = useQueryClient()
+  const columns = useBoardStore((state) => state.columns) ?? []
 
   const boardId = id ?? activeBoardId
 
@@ -38,7 +37,6 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
     return null
   }
   // Read task from React Query cache — no Zustand columns needed
-  const columns = queryClient.getQueryData<Columndb[]>(['columns', activeBoardId]) ?? []
   const task =
     type === 'Task' ? columns.flatMap((col) => col.Task).find((t) => Number(t.id) === id) : null
 

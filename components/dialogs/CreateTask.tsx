@@ -10,8 +10,9 @@ import { useBoardStore } from '@/providers/board-store-provider'
 function CreateTask() {
   const [open, setOpen] = useState<boolean>(false)
   const activeBoardId = useBoardStore((s) => s.activeBoardID)
+  const columns = useBoardStore((s) => s.columns)
 
-  if (!activeBoardId) return null
+  if (!activeBoardId || !columns?.length) return null
 
   return (
     <Dialog open={open} onOpenChange={setOpen} modal={true}>

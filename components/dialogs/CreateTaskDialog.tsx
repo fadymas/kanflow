@@ -2,15 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { createTaskSchema, type CreateTaskSchema } from '@/lib/validation'
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet
-} from '../ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
 
 import {
   Combobox,
@@ -29,14 +21,12 @@ import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 import { useEffect } from 'react'
 import { useBoardStore } from '@/providers/board-store-provider'
-import { Columndb } from '@/mocks/column.mock'
-import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '../ui/button'
+import { Task } from '@/mocks/task.mock'
 
 function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
-  const activeBoardID = useBoardStore((s) => s.activeBoardID)
-  const queryClient = useQueryClient()
-  const columns = queryClient.getQueryData(['columns', activeBoardID]) as Columndb[] | undefined
+  const columns = useBoardStore((s) => s.columns) ?? []
+  const setColumns = useBoardStore((s) => s.setColumns)
 
   const form = useForm<CreateTaskSchema>({
     resolver: zodResolver(createTaskSchema),
@@ -58,24 +48,57 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
       form.reset()
     }
   }, [open, form])
+
   async function onSubmit(values: CreateTaskSchema) {
+    const previousColumns = columns
+    const targetColumnId = values.column
+
+    // --- OPTIMISTIC ---
+    const tempTask: Task = {
+      id: `temp-${crypto.randomUUID()}`,
+      title: values.title,
+      description: values.description,
+      columnId: targetColumnId,
+      position: (columns.find((c) => String(c.id) == targetColumnId)?.Task.length ?? 0) + 1,
+      createdAt: new Date().toISOString(),
+      SubTask: values.subtasks.map((s, i) => ({
+        id: `temp-sub-${Date.now()}-${i}`,
+        title: s.title,
+        taskId: `temp-${Date.now()}`,
+        isCompleted: false
+      }))
+    }
+    setColumns(
+      columns.map((col) =>
+        String(col.id) == targetColumnId ? { ...col, Task: [...col.Task, tempTask] } : col
+      )
+    )
+    form.reset()
+    setOpen(false)
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks`, {
         method: 'POST',
         body: JSON.stringify(values),
-        headers: {
-          Accept: 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
       })
 
-      if (res.ok) {
-        form.reset()
-        setOpen(false)
-        queryClient.invalidateQueries({ queryKey: ['columns'] })
+      if (!res.ok) {
+        setColumns(previousColumns)
+        console.error('Failed to create task')
+        return
       }
-      //toast
+
+      const { task }: { task: Task } = await res.json()
+      // Replace temp task with real one
+      setColumns(
+        previousColumns.map((col) =>
+          String(col.id) == targetColumnId ? { ...col, Task: [...col.Task, task] } : col
+        )
+      )
     } catch (error) {
-      console.log(error)
+      setColumns(previousColumns)
+      console.error(error)
     }
   }
 
@@ -136,9 +159,6 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
             <FieldLegend variant="label" className="field-label">
               Subtasks
             </FieldLegend>
-            <FieldDescription>
-              Break the task into smaller steps so it is easier to track progress.
-            </FieldDescription>
             <FieldGroup className="gap-3">
               {fields.map((item, index) => (
                 <Controller
@@ -163,7 +183,7 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
                           disabled={fields.length === 1}
                           aria-label={`Remove subtask ${index + 1}`}
                         >
-                          <XIcon />
+                          <XIcon className="size-5" />
                         </Button>
                       </div>
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -193,10 +213,10 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
                   Column
                 </FieldLabel>
                 <Combobox
-                  items={columns?.map((c) => c.name)}
-                  value={columns?.find((c) => String(c.id) === field.value)?.name ?? ''}
+                  items={columns.map((c) => c.name)}
+                  value={columns.find((c) => String(c.id) === field.value)?.name ?? ''}
                   onValueChange={(name) => {
-                    const col = columns?.find((c) => c.name === name)
+                    const col = columns.find((c) => c.name === name)
                     if (col) field.onChange(String(col.id))
                   }}
                 >
@@ -209,7 +229,7 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
                   />
                   <ComboboxContent>
                     <ComboboxList className="bg-kpanal">
-                      {columns?.map((column) => (
+                      {columns.map((column) => (
                         <ComboboxItem key={column.id} value={column.name}>
                           {column.name}
                         </ComboboxItem>

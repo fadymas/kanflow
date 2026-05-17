@@ -1,6 +1,5 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
 import { Checkbox } from '../vendor/lightswind/checkbox'
 import {
@@ -13,11 +12,9 @@ import {
 import { Subtask } from '@/mocks/task.mock'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { useQueryClient } from '@tanstack/react-query'
-import { Columndb } from '@/mocks/column.mock'
 
 export default function TaskDialogActions({
   subTasks,
-  columnId,
   taskId
 }: {
   subTasks: Subtask[]
@@ -25,33 +22,29 @@ export default function TaskDialogActions({
   taskId: string
 }) {
   const activeBoardID = useBoardStore((state) => state.activeBoardID)
+  const columns = useBoardStore((state) => state.columns) ?? []
+  const setColumns = useBoardStore((state) => state.setColumns)
   const queryClient = useQueryClient()
 
   const queryKey = ['columns', activeBoardID]
 
-  // Read columns directly from React Query cache
-  const columns = queryClient.getQueryData<Columndb[]>(queryKey) ?? []
-  const taskCurrentColumn = columns.find((column) => column.id == columnId)
+  // Derive current column name reactively from Zustand — always up to date after moves
+  const taskCurrentColumn = columns
+    .flatMap((col) => col.Task.map((t) => ({ col, t })))
+    .find(({ t }) => t.id === taskId)?.col
 
   const [localSubTasks, setLocalSubTasks] = useState(subTasks)
   const [selectedColumnValue, setSelectedColumnValue] = useState(taskCurrentColumn?.name || '')
 
-  useEffect(() => {
-    setSelectedColumnValue(taskCurrentColumn?.name || '')
-  }, [taskCurrentColumn?.name])
-
   async function handleToggle(subTaskId: string, current: boolean) {
     const next = !current
+    const previousColumns = columns
 
-    // ── Snapshot for rollback ────────────────────────────────────────────
-    const previousColumns = queryClient.getQueryData<Columndb[]>(queryKey)
-
-    // ── Optimistic: update checkbox + task card subtask count ────────────
     setLocalSubTasks((prev) =>
       prev.map((s) => (s.id === subTaskId ? { ...s, isCompleted: next } : s))
     )
-    queryClient.setQueryData<Columndb[]>(queryKey, (old) =>
-      old?.map((col) => ({
+    setColumns(
+      columns.map((col) => ({
         ...col,
         Task: col.Task.map((t) =>
           t.id === taskId
@@ -74,11 +67,10 @@ export default function TaskDialogActions({
       })
 
       if (!res.ok) {
-        // ── Rollback ─────────────────────────────────────────────────────
         setLocalSubTasks((prev) =>
           prev.map((s) => (s.id === subTaskId ? { ...s, isCompleted: current } : s))
         )
-        queryClient.setQueryData(queryKey, previousColumns)
+        setColumns(previousColumns)
         console.error('Failed to update subtask')
       } else {
         queryClient.invalidateQueries({ queryKey })
@@ -87,7 +79,7 @@ export default function TaskDialogActions({
       setLocalSubTasks((prev) =>
         prev.map((s) => (s.id === subTaskId ? { ...s, isCompleted: current } : s))
       )
-      queryClient.setQueryData(queryKey, previousColumns)
+      setColumns(previousColumns)
       console.error(error)
     }
   }
@@ -95,25 +87,25 @@ export default function TaskDialogActions({
   const completedCount = localSubTasks.filter((s) => s.isCompleted).length
 
   async function handleColumnChange(newColumnId: string) {
-    // ── Snapshot for rollback ────────────────────────────────────────────
-    const previousColumns = queryClient.getQueryData<Columndb[]>(queryKey)
+    const previousColumns = columns
     const previousColumnName = selectedColumnValue
 
-    // ── Optimistic: move task to target column in cache ──────────────────
-    queryClient.setQueryData<Columndb[]>(queryKey, (old) => {
-      if (!old) return old
-      const task = old.flatMap((col) => col.Task).find((t) => t.id === taskId)
-      if (!task) return old
-      return old.map((col) => {
-        if (col.id == columnId) {
+    const task = columns.flatMap((col) => col.Task).find((t) => t.id === taskId)
+    if (!task) return
+
+    const sourceColumnId = task.columnId
+
+    setColumns(
+      columns.map((col) => {
+        if (col.id === sourceColumnId) {
           return { ...col, Task: col.Task.filter((t) => t.id !== taskId) }
         }
-        if (col.id == newColumnId) {
+        if (col.id === newColumnId) {
           return { ...col, Task: [...col.Task, { ...task, columnId: newColumnId }] }
         }
         return col
       })
-    })
+    )
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks/move`, {
@@ -121,15 +113,12 @@ export default function TaskDialogActions({
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ taskId, columnId: newColumnId })
       })
-      if (res.ok) {
-        queryClient.invalidateQueries({ queryKey })
-      } else {
-        // ── Rollback ─────────────────────────────────────────────────────
-        queryClient.setQueryData(queryKey, previousColumns)
+      if (!res.ok) {
+        setColumns(previousColumns)
         setSelectedColumnValue(previousColumnName)
       }
     } catch (error) {
-      queryClient.setQueryData(queryKey, previousColumns)
+      setColumns(previousColumns)
       setSelectedColumnValue(previousColumnName)
       console.error(error)
     }
@@ -171,8 +160,10 @@ export default function TaskDialogActions({
             value={selectedColumnValue}
             onValueChange={(value) => {
               setSelectedColumnValue(value!)
-              const newColumnId = columns.find((column) => column.name === value)?.id
-              if (columnId != newColumnId) handleColumnChange(newColumnId!)
+              const newColumnId = columns.find((col) => col.name === value)?.id
+              if (newColumnId && newColumnId !== taskCurrentColumn?.id) {
+                handleColumnChange(newColumnId)
+              }
             }}
           >
             <ComboboxInput className="w-full px-4 py-3 rounded-modal h-11.5 bg-kpanal" />

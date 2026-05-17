@@ -1,7 +1,7 @@
 'use client'
 import { DragDropContext, DropResult } from '@hello-pangea/dnd'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Column from './Column'
 import TaskDialogModal from '../dialogs/TaskDialogModal'
 import { useBoardStore } from '@/providers/board-store-provider'
@@ -9,29 +9,27 @@ import { Columndb } from '@/mocks/column.mock'
 
 function Board() {
   const activeBoard = useBoardStore((s) => s.activeBoardID) || -1
+  const setColumns = useBoardStore((s) => s.setColumns)
+  const columns = useBoardStore((s) => s.columns)
   const queryClient = useQueryClient()
 
   const queryKey = ['columns', activeBoard]
   const {
     data: serverColumns = [],
     isLoading,
-    status
+    isFetching
   } = useQuery<Columndb[]>({
     queryKey,
     queryFn: () =>
       fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns?boardId=${activeBoard}`)
         .then((res) => res.json())
         .then((data) => data.columns ?? []),
-    enabled: !!activeBoard
+    enabled: !!activeBoard && activeBoard !== -1
   })
 
-  // Local state drives rendering — instant drag updates with no re-render delay
-  const [columns, setColumns] = useState<Columndb[]>(serverColumns)
-
-  // Keep local state in sync when server data changes (board switch, initial load)
   useEffect(() => {
     setColumns(serverColumns)
-  }, [serverColumns])
+  }, [serverColumns, setColumns])
 
   function onDragEnd(result: DropResult) {
     if (
@@ -54,7 +52,7 @@ function Board() {
     const previousColumns = columns
 
     // ── Compute next state ───────────────────────────────────────────────
-    const nextColumns = columns.map((col) => {
+    const nextColumns = columns?.map((col) => {
       if (isSameColumn) {
         if (col.id == result.source.droppableId) {
           const newTasks = Array.from(col.Task)
@@ -81,7 +79,7 @@ function Board() {
     })
 
     // ── Instant local update ─────────────────────────────────────────────
-    setColumns(nextColumns)
+    setColumns(nextColumns!)
 
     // ── API call ─────────────────────────────────────────────────────────
     fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks/drag`, {
@@ -102,7 +100,7 @@ function Board() {
       })
       .catch(() => {
         // Rollback on failure
-        setColumns(previousColumns)
+        setColumns(previousColumns!)
       })
   }
 
@@ -110,7 +108,7 @@ function Board() {
     return <div>No active board selected</div>
   }
 
-  if ((isLoading && status === 'pending') || columns.length === 0) {
+  if (isLoading || (isFetching && columns?.length === 0)) {
     return <div>Loading...</div>
   }
 
@@ -118,7 +116,7 @@ function Board() {
     <>
       <TaskDialogModal />
       <DragDropContext onDragEnd={onDragEnd}>
-        {columns.map((column: Columndb) => (
+        {columns?.map((column: Columndb) => (
           <Column
             key={column.id}
             id={column.id}

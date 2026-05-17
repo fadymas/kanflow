@@ -9,17 +9,12 @@ import {
 import TaskDialogActions from './TaskDialogActions'
 import DropdownMenu from '../common/DropdownMenu'
 import { useBoardStore } from '@/providers/board-store-provider'
-import { useQueryClient } from '@tanstack/react-query'
-import { Columndb } from '@/mocks/column.mock'
 
 export default function TaskDialogModal() {
   const openTaskId = useBoardStore((state) => state.openTaskId)
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
-  const activeBoardID = useBoardStore((state) => state.activeBoardID)
-  const queryClient = useQueryClient()
+  const columns = useBoardStore((state) => state.columns) ?? []
 
-  // Read task directly from React Query cache — no Zustand columns needed
-  const columns = queryClient.getQueryData<Columndb[]>(['columns', activeBoardID]) ?? []
   const task = columns.flatMap((col) => col.Task).find((t) => t?.id === openTaskId)
 
   if (!task) return null

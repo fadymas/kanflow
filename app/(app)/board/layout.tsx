@@ -36,15 +36,14 @@ async function layout({
           openTaskId: null
         }}
       >
-        <Header />
-        <SidebarProvider
-          defaultOpen={sidebar_state === 'true'}
-          className="max-lg:min-h-[calc(100vh-73px)]"
-        >
-          <Show when="signed-in">
-            <CustomSidebar />
-          </Show>
-          {children}
+        <SidebarProvider defaultOpen={sidebar_state === 'true'} className=" flex flex-col h-screen">
+          <Header />
+          <div className="flex h-full">
+            <Show when="signed-in">
+              <CustomSidebar />
+            </Show>
+            {children}
+          </div>
         </SidebarProvider>
       </BoardStoreProvider>
     </QueryProvider>

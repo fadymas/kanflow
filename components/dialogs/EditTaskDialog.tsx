@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { useQueryClient } from '@tanstack/react-query'
 
 import { editTaskSchema, type EditTaskSchema } from '@/lib/validation'
 import { Button } from '../ui/button'
@@ -11,6 +10,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '../ui/field'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 import { useBoardStore } from '@/providers/board-store-provider'
+import { Task } from '@/mocks/task.mock'
 
 interface Props {
   taskId: number
@@ -20,8 +20,8 @@ interface Props {
 }
 
 function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
-  const queryClient = useQueryClient()
-  const activeBoardID = useBoardStore((state) => state.activeBoardID)
+  const setColumns = useBoardStore((state) => state.setColumns)
+  const columns = useBoardStore((state) => state.columns) ?? []
 
   const form = useForm<EditTaskSchema>({
     resolver: zodResolver(editTaskSchema),
@@ -31,6 +31,21 @@ function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
   const { isSubmitting } = form.formState
 
   async function onSubmit(values: EditTaskSchema) {
+    const previousColumns = columns
+
+    // --- OPTIMISTIC ---
+    setColumns(
+      columns.map((col) => ({
+        ...col,
+        Task: col.Task.map((t) =>
+          t.id == String(taskId)
+            ? { ...t, title: values.title, description: values.description }
+            : t
+        )
+      }))
+    )
+    onSuccess()
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks`, {
         method: 'PATCH',
@@ -39,14 +54,20 @@ function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
       })
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        console.error('Failed to edit task:', data)
+        setColumns(previousColumns)
+        console.error('Failed to edit task:', await res.json().catch(() => ({})))
         return
+      } else {
+        const { task }: { task: Task } = await res.json()
+        setColumns(
+          columns.map((col) => ({
+            ...col,
+            Task: col.Task.map((t) => (t.id == String(taskId) ? task : t))
+          }))
+        )
       }
-
-      await queryClient.invalidateQueries({ queryKey: ['columns', activeBoardID] })
-      onSuccess()
     } catch (error) {
+      setColumns(previousColumns)
       console.error(error)
     }
   }

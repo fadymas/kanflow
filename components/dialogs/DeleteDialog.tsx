@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useBoardStore } from '@/providers/board-store-provider'
-import { useQuery } from '@tanstack/react-query'
 import { Board } from '@/mocks/board.mock'
 
 import {
@@ -25,56 +24,94 @@ interface DeleteProps {
 function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const queryClient = useQueryClient()
+
   const clearActiveBoard = useBoardStore((state) => state.clearActiveBoard)
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
   const activeBoard = useBoardStore((state) => state.activeBoardID)
-
-  const { data: boards = [] } = useQuery<Board[]>({
-    queryKey: ['boards'],
-    queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`)
-        .then((res) => res.json())
-        .then((data) => data.boards ?? []),
-    enabled: type === 'Board'
-  })
+  const columns = useBoardStore((state) => state.columns)
+  const setColumns = useBoardStore((state) => state.setColumns)
 
   async function handleDelete() {
     setIsDeleting(true)
-    try {
-      const urlMap = {
-        Task: `${process.env.NEXT_PUBLIC_URL}/api/tasks?taskId=${id}`,
-        Column: `${process.env.NEXT_PUBLIC_URL}/api/columns?columnId=${id}`,
-        Board: `${process.env.NEXT_PUBLIC_URL}/api/boards?boardId=${id}`
-      }
 
+    const previousBoards = queryClient.getQueryData<Board[]>(['boards']) ?? []
+    const previousColumns = columns ?? []
+
+    const urlMap = {
+      Task: `${process.env.NEXT_PUBLIC_URL}/api/tasks?taskId=${id}`,
+      Column: `${process.env.NEXT_PUBLIC_URL}/api/columns?columnId=${id}`,
+      Board: `${process.env.NEXT_PUBLIC_URL}/api/boards?boardId=${id}`
+    }
+
+    // --- OPTIMISTIC UPDATE ---
+    if (type === 'Board') {
+      const remaining = previousBoards.filter((b) => b.id !== id)
+      queryClient.setQueryData<Board[]>(['boards'], remaining)
+      if (remaining.length > 0) {
+        setActiveBoard(remaining[0].id, remaining[0].name)
+        document.cookie = `active-boardId=${remaining[0].id}`
+        document.cookie = `active-boardName=${remaining[0].name}`
+      } else {
+        clearActiveBoard()
+        document.cookie = `active-boardId=null`
+        document.cookie = `active-boardName=null`
+      }
+    } else if (type === 'Column') {
+      setColumns(previousColumns.filter((col) => col.id != String(id)))
+    } else if (type === 'Task') {
+      setColumns(
+        previousColumns.map((col) => ({
+          ...col,
+          Task: col.Task.filter((t) => t.id != String(id))
+        }))
+      )
+    }
+    openCallback()
+    setOpenTaskId(null)
+
+    try {
       const res = await fetch(urlMap[type], { method: 'DELETE' })
 
       if (res.ok) {
         if (type === 'Board') {
-          // Invalidate boards cache — sidebar will refetch and show updated list
-          const remaining = boards.filter((b) => b.id !== id)
-          if (remaining.length > 0) {
-            setActiveBoard(remaining[0].id, remaining[0].name)
-
-            document.cookie = `active-boardId=${remaining[0].id}`
-            document.cookie = `active-boardName=${remaining[0].name}`
-          } else {
-            clearActiveBoard()
-            document.cookie = `active-boardId=null`
-            document.cookie = `active-boardName=null`
-          }
           await queryClient.invalidateQueries({ queryKey: ['boards'] })
-
-          // Also invalidate columns since the board is gone
-          queryClient.invalidateQueries({ queryKey: ['columns'] })
-        } else {
-          setOpenTaskId(null)
           queryClient.invalidateQueries({ queryKey: ['columns', activeBoard] })
+        } else if (type === 'Column') {
+          queryClient.setQueryData(
+            ['columns', activeBoard],
+            [...previousColumns.filter((col) => col.id != String(id))]
+          )
+        } else if (type === 'Task') {
+          queryClient.setQueryData(
+            ['columns', activeBoard],
+            previousColumns.map((col) => ({
+              ...col,
+              Task: col.Task.filter((t) => t.id != String(id))
+            }))
+          )
+          setOpenTaskId(null)
         }
-        openCallback()
+      } else {
+        // --- ROLLBACK ---
+        if (type === 'Board') {
+          queryClient.setQueryData<Board[]>(['boards'], previousBoards)
+          const active = previousBoards.find((b) => b.id === activeBoard)
+          if (active) setActiveBoard(active.id, active.name)
+        } else {
+          setColumns(previousColumns)
+        }
+        console.error(`Failed to delete ${type}`)
       }
     } catch (error) {
+      // --- ROLLBACK ---
+      if (type === 'Board') {
+        queryClient.setQueryData<Board[]>(['boards'], previousBoards)
+        const active = previousBoards.find((b) => b.id === activeBoard)
+        if (active) setActiveBoard(active.id, active.name)
+      } else {
+        setColumns(previousColumns)
+      }
       console.error(error)
     } finally {
       setIsDeleting(false)

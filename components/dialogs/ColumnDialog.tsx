@@ -28,10 +28,12 @@ interface Props {
 function ColumnDialog({ onSuccess, editId }: Props) {
   const isEditMode = Boolean(editId)
   const activeBoardId = useBoardStore((state) => state.activeBoardID)
+  const columns = useBoardStore((state) => state.columns)
+  const setColumns = useBoardStore((state) => state.setColumns)
   const queryClient = useQueryClient()
 
-  const columns = queryClient.getQueryData(['columns', activeBoardId]) as Columndb[] | undefined
   const existingColumn = columns?.find((column) => column.id == editId)
+
   const form = useForm<CreateColumnSchema>({
     resolver: zodResolver(createColumnSchema),
     defaultValues: {
@@ -40,7 +42,6 @@ function ColumnDialog({ onSuccess, editId }: Props) {
     }
   })
 
-  // Populate form when editing
   useEffect(() => {
     if (isEditMode && existingColumn) {
       form.reset({
@@ -53,26 +54,45 @@ function ColumnDialog({ onSuccess, editId }: Props) {
   const { isSubmitting } = form.formState
 
   async function onSubmit(values: CreateColumnSchema) {
+    const currentColumns = columns ?? []
+
     try {
-      if (isEditMode) {
-        // --- EDIT ---
+      if (isEditMode && editId) {
+        // --- OPTIMISTIC EDIT ---
+        const previousColumns = currentColumns
+        const optimisticColumns = currentColumns.map((col) =>
+          col.id == editId ? { ...col, name: values.title, color: values.color } : col
+        )
+        setColumns(optimisticColumns)
+        form.reset()
+        onSuccess?.()
         const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns`, {
           method: 'PATCH',
-          body: JSON.stringify({
-            columnId: editId,
-            name: values.title,
-            color: values.color
-          }),
+          body: JSON.stringify({ columnId: editId, name: values.title, color: values.color }),
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' }
         })
 
         if (!res.ok) {
           const data = await res.json().catch(() => ({}))
           console.error('Failed to update column:', data)
+          setColumns(previousColumns)
           return
         }
       } else {
-        // --- CREATE ---
+        // --- OPTIMISTIC CREATE ---
+        const tempId = `temp-${crypto.randomUUID()}`
+        const newPosition = currentColumns.length + 1
+        const optimisticColumn: Columndb = {
+          id: tempId,
+          name: values.title,
+          color: values.color,
+          position: newPosition,
+          Task: []
+        }
+        setColumns([...currentColumns, optimisticColumn])
+
+        form.reset()
+        onSuccess?.()
         const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns`, {
           method: 'POST',
           body: JSON.stringify({ ...values, boardId: activeBoardId }),
@@ -82,16 +102,21 @@ function ColumnDialog({ onSuccess, editId }: Props) {
         if (!res.ok) {
           const data = await res.json().catch(() => ({}))
           console.error('Failed to create column:', data)
+          setColumns(currentColumns)
           return
         }
-      }
 
-      form.reset()
-      onSuccess?.()
-      queryClient.invalidateQueries({ queryKey: ['columns'] })
+        const { column }: { column: Columndb } = await res.json()
+        console.log(column)
+        // Replace the temp column with the real one from the server
+        setColumns([...currentColumns, column])
+      }
     } catch (error) {
       console.error(error)
+      // Rollback on unexpected error
+      setColumns(currentColumns)
     }
+    queryClient.invalidateQueries({ queryKey: ['columns', activeBoardId] })
   }
 
   return (

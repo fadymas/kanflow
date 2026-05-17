@@ -33,6 +33,8 @@ function CustomSidebar() {
 
   const activeBoardId = useBoardStore((state) => state.activeBoardID)
   const setActiveBoardId = useBoardStore((state) => state.setActiveBoard)
+  const setColumns = useBoardStore((state) => state.setColumns)
+  const columns = useBoardStore((state) => state.columns) ?? []
 
   const { data: boards = [] } = useQuery<Board[]>({
     queryKey: ['boards'],
@@ -84,6 +86,7 @@ function CustomSidebar() {
                     onClick={() => {
                       setActiveBoardId(board.id, board.name)
                       setOpenMobile(false)
+                      setColumns(columns.filter((col) => col.boardId == String(board.id)))
                       document.cookie = `active-boardId=${board.id}`
                       document.cookie = `active-boardName=${board.name}`
                     }}
@@ -94,17 +97,19 @@ function CustomSidebar() {
                 </SidebarMenuItem>
               ))}
 
-              <SidebarMenuItem className="flex items-center">
-                <Dialog open={open} onOpenChange={setOpen}>
-                  <DialogTrigger asChild>
-                    <SidebarMenuButton className="flex items-center w-60.75! h-14 px-8 rounded-r-full cursor-pointer gap-4 py-0 text-primary-DEFAULT transition-colors font-bold text-[16px]">
-                      <Plus className="size-4.5!" />
-                      <span>Create New Board</span>
-                    </SidebarMenuButton>
-                  </DialogTrigger>
-                  {open && <CreateBoard onSuccess={() => setOpen(false)} />}
-                </Dialog>
-              </SidebarMenuItem>
+              {!isMobile && (
+                <SidebarMenuItem className="flex items-center">
+                  <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild>
+                      <SidebarMenuButton className="flex items-center w-60.75! h-14 px-8 rounded-r-full cursor-pointer gap-4 py-0 text-primary-DEFAULT transition-colors font-bold text-[16px]">
+                        <Plus className="size-4.5!" />
+                        <span>Create New Board</span>
+                      </SidebarMenuButton>
+                    </DialogTrigger>
+                    {open && <CreateBoard onSuccess={() => setOpen(false)} />}
+                  </Dialog>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroup>
 

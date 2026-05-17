@@ -76,6 +76,14 @@ export default function Column({
                 {tasks?.map((task, i) => (
                   <TaskCard key={task.id} task={task} index={i} />
                 ))}
+
+                {/* {tasks?.length === 0 && (
+                  <div className="flex flex-col items-center h-full justify-center gap-2 mt-4">
+                    <h4 className=" font-bold text-2xl text-knetural-default text-center w-full line-clamp-2">
+                      right click to edit columns
+                    </h4>
+                  </div>
+                )} */}
                 {provided.placeholder}
               </div>
             )}
