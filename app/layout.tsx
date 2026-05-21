@@ -23,14 +23,7 @@ export const metadata: Metadata = {
       'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication.',
     url: 'https://kanflow-two.vercel.app',
     siteName: 'KanFlow',
-    images: [
-      {
-        url: 'https://kanflow-two.vercel.app/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'KanFlow'
-      }
-    ],
+
     locale: 'en_US',
     type: 'website'
   },
@@ -39,8 +32,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'KanFlow — Simplified Task Management',
     description:
-      'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication.',
-    images: ['https://kanflow-two.vercel.app/og-image.png']
+      'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication.'
   }
 }
 
