@@ -5,7 +5,11 @@ import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 
 // ── Origins ────────────────────────────────────────────────────────────────
-const allowedOrigins = ['localhost:3000', process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000']
+const allowedOrigins = [
+  'https://kanflow-two.vercel.app',
+  'https://kanflow-rzqldhrxd-fadymas-projects.vercel.app',
+  process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'
+]
 
 // ── Route matchers ─────────────────────────────────────────────────────────
 const isPublicRoute = createRouteMatcher([
@@ -19,38 +23,38 @@ const isPublicRoute = createRouteMatcher([
 const isApiRoute = createRouteMatcher(['/api/(.*)'])
 
 // ── Rate limiter ───────────────────────────────────────────────────────────
-// Only initialise when env vars are present (skips local dev without Upstash)
 const ratelimit =
   process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
     ? new Ratelimit({
         redis: Redis.fromEnv(),
-        limiter: Ratelimit.slidingWindow(60, '1 m'), // 60 req / min per IP
+        limiter: Ratelimit.slidingWindow(60, '1 m'),
         analytics: true,
         prefix: 'kanflow'
       })
     : null
 
-// ── CORS helper ────────────────────────────────────────────────────────────
-function handleCors(req: NextRequest, res: NextResponse): NextResponse {
+// ── Build CORS headers ─────────────────────────────────────────────────────
+function getCorsHeaders(req: NextRequest): Record<string, string> {
   const origin = req.headers.get('origin') ?? ''
   const isAllowed = allowedOrigins.includes(origin)
 
-  if (isAllowed) {
-    res.headers.set('Access-Control-Allow-Origin', origin)
-    res.headers.set('Access-Control-Allow-Credentials', 'true')
-    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
-    res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
-  }
+  if (!isAllowed) return {}
 
-  return res
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+  }
 }
 
 // ── Middleware ─────────────────────────────────────────────────────────────
 export default clerkMiddleware(async (auth, req) => {
+  const corsHeaders = getCorsHeaders(req)
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    const preflight = new NextResponse(null, { status: 204 })
-    return handleCors(req, preflight)
+    return new NextResponse(null, { status: 204, headers: corsHeaders })
   }
 
   // Rate limit API routes only
@@ -70,19 +74,22 @@ export default clerkMiddleware(async (auth, req) => {
           'X-RateLimit-Limit': limit.toString(),
           'X-RateLimit-Remaining': '0',
           'X-RateLimit-Reset': reset.toString(),
-          'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString()
+          'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString(),
+          ...corsHeaders
         }
       })
     }
 
-    // Attach rate limit headers to passing requests too
-    const res = NextResponse.next()
-    res.headers.set('X-RateLimit-Limit', limit.toString())
-    res.headers.set('X-RateLimit-Remaining', remaining.toString())
-    res.headers.set('X-RateLimit-Reset', reset.toString())
-
     if (!isPublicRoute(req)) await auth.protect()
-    return handleCors(req, res)
+
+    return NextResponse.next({
+      headers: {
+        'X-RateLimit-Limit': limit.toString(),
+        'X-RateLimit-Remaining': remaining.toString(),
+        'X-RateLimit-Reset': reset.toString(),
+        ...corsHeaders
+      }
+    })
   }
 
   // Protect non-public routes
@@ -90,8 +97,7 @@ export default clerkMiddleware(async (auth, req) => {
     await auth.protect()
   }
 
-  const res = NextResponse.next()
-  return handleCors(req, res)
+  return NextResponse.next({ headers: corsHeaders })
 })
 
 export const config = {

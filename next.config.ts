@@ -1,8 +1,8 @@
 import type { NextConfig } from 'next'
 
 const allowedOrigins = [
-  'https://kanflow.app',
-  'https://www.kanflow.app',
+  'https://kanflow-two.vercel.app',
+  'https://kanflow-rzqldhrxd-fadymas-projects.vercel.app',
   process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'
 ].filter(Boolean)
 
