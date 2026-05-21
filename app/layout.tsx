@@ -5,9 +5,6 @@ import { ui } from '@clerk/ui'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 
-import { Analytics } from '@vercel/analytics/next'
-import { SpeedInsights } from '@vercel/speed-insights/next'
-
 import { cookies } from 'next/headers'
 
 import { ThemeProvider } from 'theme-handler'
@@ -16,23 +13,40 @@ export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_URL
     ? new URL(process.env.NEXT_PUBLIC_URL)
     : new URL('https://kanflow-two.vercel.app'),
-
+  title: {
+    default: 'KanFlow — Simplified Task Management',
+    template: '%s | KanFlow'
+  },
+  description:
+    'KanFlow is a real-time Kanban board for managing tasks across multiple projects. Drag-and-drop tasks, organize boards, collaborate with your team, and stay productive.',
+  keywords: [
+    'kanban',
+    'task management',
+    'project management',
+    'productivity',
+    'team collaboration',
+    'kanflow'
+  ],
+  authors: [{ name: 'Fady Mahrous' }],
+  creator: 'Fady Mahrous',
   openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: '/',
+    siteName: 'KanFlow',
     title: 'KanFlow — Simplified Task Management',
     description:
-      'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication.',
-    url: 'https://kanflow-two.vercel.app',
-    siteName: 'KanFlow',
-
-    locale: 'en_US',
-    type: 'website'
+      'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication. Built for high-performance teams.'
   },
-
   twitter: {
     card: 'summary_large_image',
     title: 'KanFlow — Simplified Task Management',
     description:
       'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication.'
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico'
   }
 }
 
@@ -60,11 +74,7 @@ export default async function RootLayout({
     >
       <body className="min-h-screen k-background">
         <ClerkProvider appearance={shadcn} ui={ui}>
-          <ThemeProvider theme={theme ?? 'light'}>
-            {children}
-            <SpeedInsights />
-            <Analytics />
-          </ThemeProvider>
+          <ThemeProvider theme={theme ?? 'light'}>{children}</ThemeProvider>
         </ClerkProvider>
       </body>
     </html>
