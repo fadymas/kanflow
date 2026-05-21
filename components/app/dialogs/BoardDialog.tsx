@@ -13,13 +13,13 @@ import {
   type RenameBoardSchema
 } from '@/lib/validation'
 
-import { Button } from '../ui/button'
-import { DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
-import { Input } from '../ui/input'
+import { Button } from '../../ui/button'
+import { DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../../ui/field'
+import { Input } from '../../ui/input'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { Board } from '@/mocks/board.mock'
-import { useSidebar } from '../ui/sidebar'
+import { useSidebar } from '../../ui/sidebar'
 
 interface Props {
   onSuccess: () => void

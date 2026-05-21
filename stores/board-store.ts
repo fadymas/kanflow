@@ -36,6 +36,10 @@ export const createBoardStore = (initState: BoardState = defaultInitState) => {
       }),
       {
         name: 'active-board',
+        merge: (persistedState, currentState) => ({
+          ...(persistedState as object),
+          ...currentState
+        }),
         partialize: (state) => ({
           activeBoardID: state.activeBoardID,
           activeBoardName: state.activeBoardName

@@ -7,7 +7,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import TaskDialogActions from './TaskDialogActions'
-import DropdownMenu from '../common/DropdownMenu'
+import DropdownMenu from '../../common/DropdownMenu'
 import { useBoardStore } from '@/providers/board-store-provider'
 
 export default function TaskDialogModal() {

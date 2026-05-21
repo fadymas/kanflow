@@ -1,9 +1,9 @@
 'use client'
 import { useState } from 'react'
-import BoardDialog from '../dialogs/BoardDialog'
-import EditTaskDialog from '../dialogs/EditTaskDialog'
+import BoardDialog from '../app/dialogs/BoardDialog'
+import EditTaskDialog from '../app/dialogs/EditTaskDialog'
 import { Button } from '../ui/button'
-import { Dialog, DialogTrigger } from '../ui/dialog'
+import { Dialog } from '../ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,8 @@ import {
 } from '../ui/dropdown-menu'
 import { EllipsisVertical, PencilIcon, Plus, TrashIcon } from 'lucide-react'
 import { useBoardStore } from '@/providers/board-store-provider'
-import DeleteDialog from '../dialogs/DeleteDialog'
+import DeleteDialog from '../app/dialogs/DeleteDialog'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface Props {
   type: 'Board' | 'Task'
@@ -26,6 +27,8 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
   const [openAddBoard, setOpenAddBoard] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
 
+  const isMobile = useIsMobile()
+
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
   const activeBoardId = useBoardStore((state) => state.activeBoardID)
   const activeBoardName = useBoardStore((state) => state.activeBoardName)
@@ -33,10 +36,10 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
 
   const boardId = id ?? activeBoardId
 
-  if (type == 'Board' && !boardId) {
+  if (type == 'Board' && !boardId && !isMobile) {
     return null
   }
-  // Read task from React Query cache — no Zustand columns needed
+
   const task =
     type === 'Task' ? columns.flatMap((col) => col.Task).find((t) => Number(t.id) === id) : null
 
@@ -49,57 +52,62 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-kbackground w-35">
-          {type === 'Board' && (
-            <Dialog open={openAddBoard} onOpenChange={setOpenAddBoard}>
-              <DialogTrigger asChild>
-                <DropdownMenuItem
-                  className="text-primary-DEFAULT md:hidden"
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <Plus className="size-4" />
-                  Add Board
-                </DropdownMenuItem>
-              </DialogTrigger>
-              <BoardDialog onSuccess={() => setOpenAddBoard(false)} />
-            </Dialog>
+          {type === 'Board' && isMobile && (
+            <DropdownMenuItem
+              className="text-primary-DEFAULT dark:text-yellow-500"
+              onSelect={() => setOpenAddBoard(true)}
+            >
+              <Plus className="size-4" />
+              Add Board
+            </DropdownMenuItem>
           )}
 
-          <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-            <DialogTrigger asChild>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <PencilIcon className="size-4" />
-                {type === 'Board' ? 'Change Name' : 'Edit'}
-              </DropdownMenuItem>
-            </DialogTrigger>
-            {type === 'Board' && openEdit && (
-              <BoardDialog
-                editId={boardId}
-                onSuccess={() => {
-                  setOpenEdit(false)
-                }}
-              />
-            )}
-            {type === 'Task' && openEdit && task && (
-              <EditTaskDialog
-                taskId={Number(task.id)}
-                title={task.title}
-                description={task.description ?? ''}
-                onSuccess={() => {
-                  setOpenEdit(false)
-                  setOpenTaskId(null)
-                }}
-              />
-            )}
-          </Dialog>
+          {boardId && (
+            <DropdownMenuItem onSelect={() => setOpenEdit(true)}>
+              <PencilIcon className="size-4" />
+              {type === 'Board' ? 'Change Name' : 'Edit'}
+            </DropdownMenuItem>
+          )}
 
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onSelect={() => setOpenDelete(true)}>
-            <TrashIcon className="size-4" />
-            Delete
-          </DropdownMenuItem>
+          {boardId && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onSelect={() => setOpenDelete(true)}>
+                <TrashIcon className="size-4" />
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Add Board dialog — outside dropdown */}
+      <Dialog open={openAddBoard} onOpenChange={setOpenAddBoard}>
+        <BoardDialog onSuccess={() => setOpenAddBoard(false)} />
+      </Dialog>
+
+      {/* Edit dialog — outside dropdown */}
+      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+        {type === 'Board' && openEdit && (
+          <BoardDialog
+            editId={boardId}
+            onSuccess={() => setOpenEdit(false)}
+          />
+        )}
+        {type === 'Task' && openEdit && task && (
+          <EditTaskDialog
+            taskId={Number(task.id)}
+            title={task.title}
+            description={task.description ?? ''}
+            onSuccess={() => {
+              setOpenEdit(false)
+              setOpenTaskId(null)
+            }}
+          />
+        )}
+      </Dialog>
+
+      {/* Delete dialog — outside dropdown */}
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
         <DeleteDialog
           type={type}

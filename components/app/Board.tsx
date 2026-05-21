@@ -3,16 +3,18 @@ import { DragDropContext, DropResult } from '@hello-pangea/dnd'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import Column from './Column'
-import TaskDialogModal from '../dialogs/TaskDialogModal'
+import TaskDialogModal from './dialogs/TaskDialogModal'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { Columndb } from '@/mocks/column.mock'
+import { ColumnSkeleton } from './skeletons'
+import Image from 'next/image'
 
 function Board() {
-  const activeBoard = useBoardStore((s) => s.activeBoardID) || -1
+  const activeBoard = useBoardStore((s) => s.activeBoardID)
   const setColumns = useBoardStore((s) => s.setColumns)
   const columns = useBoardStore((s) => s.columns)
-  const queryClient = useQueryClient()
 
+  const queryClient = useQueryClient()
   const queryKey = ['columns', activeBoard]
   const {
     data: serverColumns = [],
@@ -24,7 +26,7 @@ function Board() {
       fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns?boardId=${activeBoard}`)
         .then((res) => res.json())
         .then((data) => data.columns ?? []),
-    enabled: !!activeBoard && activeBoard !== -1
+    enabled: !!activeBoard && activeBoard != 0
   })
 
   useEffect(() => {
@@ -45,13 +47,11 @@ function Board() {
 
     if (isSameColumn && samePosition) return
 
-    const sourceIndex = result.source.index // 0-based
-    const destinationIndex = result.destination.index // 0-based
+    const sourceIndex = result.source.index
+    const destinationIndex = result.destination.index
 
-    // ── Snapshot for rollback ────────────────────────────────────────────
     const previousColumns = columns
 
-    // ── Compute next state ───────────────────────────────────────────────
     const nextColumns = columns?.map((col) => {
       if (isSameColumn) {
         if (col.id == result.source.droppableId) {
@@ -78,10 +78,8 @@ function Board() {
       return col
     })
 
-    // ── Instant local update ─────────────────────────────────────────────
     setColumns(nextColumns!)
 
-    // ── API call ─────────────────────────────────────────────────────────
     fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks/drag`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -95,21 +93,41 @@ function Board() {
     })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to drag task')
-        // Sync local state into React Query cache so other consumers stay consistent
         queryClient.setQueryData(queryKey, nextColumns)
       })
       .catch(() => {
-        // Rollback on failure
         setColumns(previousColumns!)
       })
   }
 
-  if (activeBoard === -1) {
-    return <div>No active board selected</div>
+  if (!activeBoard) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-6 w-full h-full">
+        <Image
+          src="/Illustrations/noActiveBoard_light.png"
+          alt="No board selected"
+          width={300}
+          height={200}
+          className="dark:hidden object-contain w-75 h-50"
+          loading="eager"
+        />
+        <Image
+          src="/Illustrations/noActiveBoard_dark.png"
+          alt="No board selected"
+          width={300}
+          height={200}
+          className="hidden dark:block object-contain w-75 h-50"
+          loading="eager"
+        />
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h2 className="text-[24px] font-bold text-foreground">No board selected</h2>
+        </div>
+      </div>
+    )
   }
 
   if (isLoading || (isFetching && columns?.length === 0)) {
-    return <div>Loading...</div>
+    return Array.from({ length: 3 }).map((_, i) => <ColumnSkeleton key={i} taskCount={3} />)
   }
 
   return (

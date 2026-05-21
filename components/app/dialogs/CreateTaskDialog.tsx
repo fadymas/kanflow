@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { createTaskSchema, type CreateTaskSchema } from '@/lib/validation'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../../ui/field'
 
 import {
   Combobox,
@@ -10,18 +10,18 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList
-} from '../ui/combobox'
+} from '../../ui/combobox'
 
-import { DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
+import { DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog'
 
 import { Controller } from 'react-hook-form'
 import { Plus, XIcon } from 'lucide-react'
 
-import { Input } from '../ui/input'
-import { Textarea } from '../ui/textarea'
+import { Input } from '../../ui/input'
+import { Textarea } from '../../ui/textarea'
 import { useEffect } from 'react'
 import { useBoardStore } from '@/providers/board-store-provider'
-import { Button } from '../ui/button'
+import { Button } from '../../ui/button'
 import { Task } from '@/mocks/task.mock'
 
 function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {

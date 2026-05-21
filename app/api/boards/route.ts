@@ -14,7 +14,11 @@ export async function GET() {
 
     const boards = await prisma.board.findMany({
       where: { ownerId: user.id },
-      select: { id: true, name: true, Column: { select: { id: true, name: true, position: true, color: true } } },
+      select: {
+        id: true,
+        name: true,
+        Column: { select: { id: true, name: true, position: true, color: true } }
+      },
       orderBy: { created_at: 'asc' }
     })
 

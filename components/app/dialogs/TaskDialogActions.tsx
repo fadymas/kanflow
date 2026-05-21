@@ -1,14 +1,14 @@
 'use client'
 import { useState } from 'react'
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
-import { Checkbox } from '../vendor/lightswind/checkbox'
+import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../../ui/field'
+import { Checkbox } from '../../vendor/lightswind/checkbox'
 import {
   Combobox,
   ComboboxContent,
   ComboboxInput,
   ComboboxItem,
   ComboboxList
-} from '../ui/combobox'
+} from '../../ui/combobox'
 import { Subtask } from '@/mocks/task.mock'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { useQueryClient } from '@tanstack/react-query'

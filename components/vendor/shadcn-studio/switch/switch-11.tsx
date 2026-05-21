@@ -16,12 +16,12 @@ const SwitchDualIconLabelDemo = () => {
   }
 
   return (
-    <div className="group inline-flex items-center gap-6 text-knetural-default">
+    <div className="group inline-flex items-center gap-4 text-knetural-default">
       <span
         id={`${id}-light`}
         className={cn(
           '   cursor-pointer text-left text-sm font-medium',
-          theme === 'light' ? 'text-black dark:text-white' : 'text-knetural-default'
+          theme === 'light' ? ' text-black' : 'text-knetural-default'
         )}
         aria-controls={id}
         onClick={() => setTheme('light')}
@@ -40,7 +40,7 @@ const SwitchDualIconLabelDemo = () => {
         id={`${id}-dark`}
         className={cn(
           ' cursor-pointer text-right text-sm font-medium',
-          theme === 'dark' ? 'text-black dark:text-white' : 'text-knetural-default'
+          theme === 'dark' ? 'text-white' : 'text-knetural-default'
         )}
         aria-controls={id}
         onClick={() => setTheme('dark')}

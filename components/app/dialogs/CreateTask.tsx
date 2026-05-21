@@ -2,8 +2,8 @@
 
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '../ui/button'
-import { Dialog, DialogTrigger } from '../ui/dialog'
+import { Button } from '../../ui/button'
+import { Dialog, DialogTrigger } from '../../ui/dialog'
 import CreateTaskDialog from './CreateTaskDialog'
 import { useBoardStore } from '@/providers/board-store-provider'
 
@@ -19,7 +19,7 @@ function CreateTask() {
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          className="w-40 h-12 rounded-full px-6 py-3 gap-2 from-primary-300 to-primary-400 bg-linear-to-r text-white max-md:w-1 max-md:h-1"
+          className="w-40 h-10 rounded-full px-6 py-3 gap-2 from-primary-300 to-primary-400 bg-linear-to-r dark:from-yellow-500 dark:to-yellow-600 text-white max-md:w-1 max-md:h-1 text-[14px]"
         >
           <Plus />
           <span className="max-md:hidden">Add New Task</span>

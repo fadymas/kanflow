@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server'
 
 export async function getCurrentDbUser() {
   const { userId } = await auth()
-
   if (!userId) {
     return {
       error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) as NextResponse,

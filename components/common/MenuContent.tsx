@@ -3,8 +3,8 @@ import { PencilIcon, TrashIcon } from 'lucide-react'
 import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '../ui/context-menu'
 import { Dialog } from '../ui/dialog'
 import { useState } from 'react'
-import DeleteDialog from '../dialogs/DeleteDialog'
-import ColumnDialog from '../dialogs/ColumnDialog'
+import DeleteDialog from '../app/dialogs/DeleteDialog'
+import ColumnDialog from '../app/dialogs/ColumnDialog'
 
 interface Props {
   id: number

@@ -12,12 +12,12 @@ import { createColumnSchema, type CreateColumnSchema } from '@/lib/validation'
 import { cn } from '@/lib/utils'
 import { useBoardStore } from '@/providers/board-store-provider'
 
-import { Button } from '../ui/button'
-import { DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field'
-import { Input } from '../ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group'
+import { Button } from '../../ui/button'
+import { DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../../ui/field'
+import { Input } from '../../ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover'
+import { RadioGroup, RadioGroupItem } from '../../ui/radio-group'
 import { Columndb } from '@/mocks/column.mock'
 
 interface Props {
@@ -87,6 +87,7 @@ function ColumnDialog({ onSuccess, editId }: Props) {
           name: values.title,
           color: values.color,
           position: newPosition,
+          boardId: String(activeBoardId)!,
           Task: []
         }
         setColumns([...currentColumns, optimisticColumn])

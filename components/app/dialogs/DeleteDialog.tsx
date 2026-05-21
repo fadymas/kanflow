@@ -11,8 +11,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../ui/dialog'
-import { Button } from '../ui/button'
+} from '../../ui/dialog'
+import { Button } from '../../ui/button'
 
 interface DeleteProps {
   type: 'Task' | 'Board' | 'Column'

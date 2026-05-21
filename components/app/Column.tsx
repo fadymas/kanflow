@@ -9,7 +9,7 @@ import CustomMenuContent from '../common/MenuContent'
 import { Droppable } from '@hello-pangea/dnd'
 import { Task } from '@/mocks/task.mock'
 import { useState } from 'react'
-import ColumnDialog from '../dialogs/ColumnDialog'
+import ColumnDialog from './dialogs/ColumnDialog'
 
 interface ColumnProps {
   id?: string
@@ -36,7 +36,7 @@ export default function Column({
           <Button
             variant="outline"
             className={cn(
-              'min-w-75 min-h-full dark:bg-[rgba(43,44,55,0.5)] bg-[rgba(214,227,249,0.4)] rounded-modal flex flex-col items-center justify-center gap-4  ',
+              'min-w-75 min-h-full h-full dark:bg-[rgba(43,44,55,0.5)] bg-[rgba(214,227,249,0.4)] rounded-modal flex flex-col items-center justify-center gap-4  ',
               className
             )}
           >
@@ -52,7 +52,7 @@ export default function Column({
   }
 
   return (
-    <div className={cn('flex flex-col gap-6 max-w-75 min-w-75 w-75 min-h-full', className)}>
+    <div className={cn('flex flex-col gap-6 max-w-full min-w-75 w-75 min-h-full', className)}>
       <div className="flex items-center gap-3">
         <div className={`w-4 min-h-full rounded-full ring`} style={{ backgroundColor: color }} />
         <div className="flex">

@@ -34,7 +34,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
 
 # vercel
 .vercel
@@ -44,8 +44,8 @@ yarn-error.log*
 next-env.d.ts
 
 # Ai
-/.agent
-/.agents
+/.agent/
+/.agents/
 opencode.json
 mcp.json
 /lib/generated/prisma

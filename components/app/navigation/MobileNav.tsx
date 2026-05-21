@@ -7,7 +7,7 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue
-} from '../ui/select'
+} from '../../ui/select'
 import { boards } from '@/mocks/board.mock'
 import { Fragment } from 'react/jsx-runtime'
 function MobileNavMenu() {
