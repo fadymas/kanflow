@@ -7,21 +7,34 @@ const allowedOrigins = [
 ].filter(Boolean)
 
 const isDev = process.env.NODE_ENV === 'development'
+const isVercel = !!process.env.VERCEL
 
 const csp = [
   "default-src 'self'",
 
-  // Scripts — Clerk requires unsafe-inline + unsafe-eval for its UI components
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.com https://*.clerk.com https://*.clerk.accounts.dev ${isDev ? 'http://localhost:3000' : ''}`.trim(),
+  // Scripts
+  [
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    'https://clerk.com',
+    'https://*.clerk.com',
+    'https://*.clerk.accounts.dev',
+    // Vercel toolbar (preview deployments) + Speed Insights + Analytics
+    isVercel
+      ? 'https://vercel.live https://*.vercel.live https://vercel.com https://va.vercel-scripts.com'
+      : '',
+    isDev ? 'http://localhost:3000 https://va.vercel-scripts.com' : ''
+  ]
+    .filter(Boolean)
+    .join(' '),
 
-  // Styles — unsafe-inline needed for Tailwind + Clerk + shadcn injected styles
+  // Styles
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
 
   // Fonts
   "font-src 'self' https://fonts.gstatic.com data:",
 
-  // Images — Clerk user avatars come from img.clerk.com
-  "img-src 'self' blob: data: https://img.clerk.com https://*.clerk.com",
+  // Images
+  "img-src 'self' blob: data: https://img.clerk.com https://*.clerk.com https://vercel.com",
 
   // Fetch / WebSocket connections
   [
@@ -33,13 +46,26 @@ const csp = [
     'wss://*.supabase.co',
     'https://prisma-data.net',
     'https://*.prisma-data.net',
-    isDev ? 'http://localhost:3000 ws://localhost:3000' : ''
+    'https://clerk-telemetry.com/v1/event',
+    // Vercel Analytics + Speed Insights reporting endpoints
+    isVercel
+      ? 'https://vercel.live https://*.vercel.live wss://vercel.live https://va.vercel-scripts.com https://*.vercel.app'
+      : '',
+    isDev ? 'http://localhost:3000 ws://localhost:3000 https://va.vercel-scripts.com' : ''
   ]
     .filter(Boolean)
     .join(' '),
 
-  // Frames — Clerk hosted pages / OAuth popups
-  "frame-src 'self' https://clerk.com https://*.clerk.com https://*.clerk.accounts.dev",
+  // Frames
+  [
+    "frame-src 'self'",
+    'https://clerk.com',
+    'https://*.clerk.com',
+    'https://*.clerk.accounts.dev',
+    isVercel ? 'https://vercel.live https://*.vercel.live' : ''
+  ]
+    .filter(Boolean)
+    .join(' '),
 
   // Workers
   "worker-src 'self' blob:",
@@ -47,7 +73,7 @@ const csp = [
   // Manifests
   "manifest-src 'self'",
 
-  // Block plugins (Flash, Java, etc.)
+  // Block plugins
   "object-src 'none'",
 
   // Block <base> tag hijacking
@@ -56,7 +82,7 @@ const csp = [
   // Block form submissions to external domains
   "form-action 'self'",
 
-  // Prevent this site from being framed by others
+  // Prevent clickjacking
   "frame-ancestors 'self'"
 ]
   .filter(Boolean)
