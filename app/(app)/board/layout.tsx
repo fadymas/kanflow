@@ -5,7 +5,9 @@ import { Board } from '@/mocks/board.mock'
 import { BoardStoreProvider } from '@/providers/board-store-provider'
 import QueryProvider from '@/providers/query-provider'
 import { Show } from '@clerk/nextjs'
-import { cookies, headers } from 'next/headers'
+import { auth } from '@clerk/nextjs/server'
+import { prisma } from '@/lib/prisma'
+import { cookies } from 'next/headers'
 import React from 'react'
 
 async function layout({
@@ -17,14 +19,28 @@ async function layout({
   const sidebar_state = cookieStore.get('sidebar_state')?.value
   const activeBoardId = cookieStore.get('active-boardId')?.value || '0'
   const activeBoardName = cookieStore.get('active-boardName')?.value
+
   let initialBoards: Board[] = []
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
-    headers: await headers()
-  })
+  try {
+    const { userId } = await auth()
+    if (userId) {
+      const user = await prisma.user.findFirst({ where: { clerkId: userId } })
+      if (user) {
+        const boards = await prisma.board.findMany({
+          where: { ownerId: user.id },
+          select: { id: true, name: true, Column: { select: { id: true, name: true, position: true, color: true } } },
+          orderBy: { created_at: 'asc' }
+        })
+        initialBoards = JSON.parse(
+          JSON.stringify(boards, (_, v) => (typeof v === 'bigint' ? Number(v) : v))
+        )
+      }
+    }
+  } catch (e) {
+    console.error('Failed to fetch initial boards:', e)
+  }
 
-  const data = await res.json()
-  initialBoards = data.boards ?? []
   return (
     <QueryProvider initialBoards={initialBoards}>
       <BoardStoreProvider
@@ -34,7 +50,7 @@ async function layout({
           openTaskId: null
         }}
       >
-        <SidebarProvider defaultOpen={sidebar_state === 'true'} className=" flex flex-col h-screen">
+        <SidebarProvider defaultOpen={sidebar_state === 'true'} className="flex flex-col h-screen">
           <Header />
           <div className="flex h-full max-h-[calc(100dvh-64px)]">
             <Show when="signed-in">
