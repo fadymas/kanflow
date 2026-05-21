@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -7,7 +8,6 @@ import { Redis } from '@upstash/redis'
 // ── Origins ────────────────────────────────────────────────────────────────
 const allowedOrigins = [
   'https://kanflow-two.vercel.app',
-  'https://kanflow-rzqldhrxd-fadymas-projects.vercel.app',
   process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'
 ]
 
@@ -48,8 +48,9 @@ function getCorsHeaders(req: NextRequest): Record<string, string> {
   }
 }
 
-// ── Middleware ─────────────────────────────────────────────────────────────
-export default clerkMiddleware(async (auth, req) => {
+// ── Base Clerk Handler ─────────────────────────────────────────────────────
+// We wrap the clerkMiddleware execution into a separate block
+const clerkHandler = clerkMiddleware(async (auth, req) => {
   const corsHeaders = getCorsHeaders(req)
 
   // Handle CORS preflight
@@ -99,6 +100,29 @@ export default clerkMiddleware(async (auth, req) => {
 
   return NextResponse.next({ headers: corsHeaders })
 })
+
+// ── Root Middleware Interceptor ────────────────────────────────────────────
+// This serves as the master gatekeeper to drop Google Search Console issues entirely
+export default async function proxy(req: NextRequest, event: any) {
+  const userAgent = req.headers.get('user-agent') || ''
+  const pathname = req.nextUrl.pathname
+
+  // Match Google/Bing bots or common crawler signatures
+  const isBot = /bot|crawler|spider|google|bing|yahoo|search-console/i.test(userAgent)
+
+  // Match crucial SEO static files
+  const isSeoFile =
+    pathname === '/sitemap.xml' || pathname === '/robots.txt' || pathname.startsWith('/public/')
+
+  // If it's a search bot or a direct asset fetch, yield control immediately
+  if (isBot || isSeoFile) {
+    const corsHeaders = getCorsHeaders(req)
+    return NextResponse.next({ headers: corsHeaders })
+  }
+
+  // Otherwise, fallback to your normal Clerk authentication pipeline
+  return clerkHandler(req, event)
+}
 
 export const config = {
   matcher: [
