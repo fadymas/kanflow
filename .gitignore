@@ -13,7 +13,7 @@
 # testing
 /coverage
 # /mocks
-*.png
+
 *.dio
 
 # next.js
