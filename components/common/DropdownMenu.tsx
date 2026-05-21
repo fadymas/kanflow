@@ -62,14 +62,14 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
             </DropdownMenuItem>
           )}
 
-          {boardId && (
+          {boardId ? (
             <DropdownMenuItem onSelect={() => setOpenEdit(true)}>
               <PencilIcon className="size-4" />
               {type === 'Board' ? 'Change Name' : 'Edit'}
             </DropdownMenuItem>
-          )}
+          ) : null}
 
-          {boardId && (
+          {boardId ? (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onSelect={() => setOpenDelete(true)}>
@@ -77,7 +77,7 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
                 Delete
               </DropdownMenuItem>
             </>
-          )}
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -89,10 +89,7 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
       {/* Edit dialog — outside dropdown */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
         {type === 'Board' && openEdit && (
-          <BoardDialog
-            editId={boardId}
-            onSuccess={() => setOpenEdit(false)}
-          />
+          <BoardDialog editId={boardId} onSuccess={() => setOpenEdit(false)} />
         )}
         {type === 'Task' && openEdit && task && (
           <EditTaskDialog
