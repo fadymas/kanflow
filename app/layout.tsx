@@ -14,6 +14,9 @@ import { ThemeProvider } from 'theme-handler'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL!),
+  verification: {
+    google: 'gDo-bQE_5gQoEWlpOsKdHaMRERDv7C4pK3XwHPKC3dk'
+  },
   title: {
     default: 'KanFlow — Simplified Task Management',
     template: '%s | KanFlow'
