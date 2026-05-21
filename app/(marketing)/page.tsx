@@ -13,7 +13,8 @@ export const metadata: Metadata = {
     description:
       'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication. Experience the workflow designed for high-performance teams.',
     url: '/',
-    type: 'website'
+    type: 'website',
+    siteName: 'KanFlow'
   },
   twitter: {
     card: 'summary_large_image',
