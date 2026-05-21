@@ -5,6 +5,9 @@ import { ui } from '@clerk/ui'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+
 import { cookies } from 'next/headers'
 
 import { ThemeProvider } from 'theme-handler'
@@ -81,7 +84,11 @@ export default async function RootLayout({
     >
       <body className="min-h-screen k-background">
         <ClerkProvider appearance={shadcn} ui={ui}>
-          <ThemeProvider theme={theme ?? 'light'}>{children}</ThemeProvider>
+          <ThemeProvider theme={theme ?? 'light'}>
+            {children}
+            <SpeedInsights />
+            <Analytics />
+          </ThemeProvider>
         </ClerkProvider>
       </body>
     </html>
