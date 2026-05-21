@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -48,17 +47,28 @@ function getCorsHeaders(req: NextRequest): Record<string, string> {
   }
 }
 
-// ── Base Clerk Handler ─────────────────────────────────────────────────────
-// We wrap the clerkMiddleware execution into a separate block
-const clerkHandler = clerkMiddleware(async (auth, req) => {
+// ── Middleware ─────────────────────────────────────────────────────────────
+// Keeping clerkMiddleware as the direct default export makes Clerk happy!
+export default clerkMiddleware(async (auth, req) => {
+  const userAgent = req.headers.get('user-agent') || ''
+  const pathname = req.nextUrl.pathname
   const corsHeaders = getCorsHeaders(req)
 
-  // Handle CORS preflight
+  // 1. Googlebot & SEO Interceptor: Run this BEFORE any Clerk/Ratelimit logic
+  const isBot = /bot|crawler|spider|google|bing|yahoo|search-console/i.test(userAgent)
+  const isSeoFile =
+    pathname === '/sitemap.xml' || pathname === '/robots.txt' || pathname.startsWith('/public/')
+
+  if (isBot || isSeoFile) {
+    return NextResponse.next({ headers: corsHeaders })
+  }
+
+  // 2. Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new NextResponse(null, { status: 204, headers: corsHeaders })
   }
 
-  // Rate limit API routes only
+  // 3. Rate limit API routes only
   if (isApiRoute(req) && ratelimit) {
     const ip =
       req.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
@@ -93,36 +103,13 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
     })
   }
 
-  // Protect non-public routes
+  // 4. Protect non-public routes
   if (!isPublicRoute(req)) {
     await auth.protect()
   }
 
   return NextResponse.next({ headers: corsHeaders })
 })
-
-// ── Root Middleware Interceptor ────────────────────────────────────────────
-// This serves as the master gatekeeper to drop Google Search Console issues entirely
-export default async function proxy(req: NextRequest, event: any) {
-  const userAgent = req.headers.get('user-agent') || ''
-  const pathname = req.nextUrl.pathname
-
-  // Match Google/Bing bots or common crawler signatures
-  const isBot = /bot|crawler|spider|google|bing|yahoo|search-console/i.test(userAgent)
-
-  // Match crucial SEO static files
-  const isSeoFile =
-    pathname === '/sitemap.xml' || pathname === '/robots.txt' || pathname.startsWith('/public/')
-
-  // If it's a search bot or a direct asset fetch, yield control immediately
-  if (isBot || isSeoFile) {
-    const corsHeaders = getCorsHeaders(req)
-    return NextResponse.next({ headers: corsHeaders })
-  }
-
-  // Otherwise, fallback to your normal Clerk authentication pipeline
-  return clerkHandler(req, event)
-}
 
 export const config = {
   matcher: [
