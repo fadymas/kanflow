@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: 'KanFlow — Simplified Task Management',
   description:
     'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication. Experience the workflow designed for high-performance teams.',
+  verification: {
+    google: 'gDo-bQE_5gQoEWlpOsKdHaMRERDv7C4pK3XwHPKC3dk'
+  },
   openGraph: {
     title: 'KanFlow — Simplified Task Management',
     description:
@@ -124,7 +127,7 @@ export default function MarketingPage() {
               <div className="relative w-full max-w-120">
                 {/* Decorative glow behind the card */}
                 <div
-                  className="pointer-events-none absolute -inset-[10%] opacity-20 dark:opacity-15 blur-[32px] rounded-full"
+                  className="pointer-events-none absolute inset-[-10%] opacity-20 dark:opacity-15 blur-[32px] rounded-full"
                   style={{
                     background:
                       'linear-gradient(33deg, var(--color-primary-700) 0%, transparent 50%, var(--color-tertiary-400) 100%)'

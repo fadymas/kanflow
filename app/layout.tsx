@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_URL
     ? new URL(process.env.NEXT_PUBLIC_URL)
     : new URL('https://kanflow-two.vercel.app'),
+  verification: {
+    google: 'gDo-bQE_5gQoEWlpOsKdHaMRERDv7C4pK3XwHPKC3dk'
+  },
   title: {
     default: 'KanFlow — Simplified Task Management',
     template: '%s | KanFlow'
