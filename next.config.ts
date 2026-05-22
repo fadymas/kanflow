@@ -18,6 +18,7 @@ const csp = [
     'https://clerk.com',
     'https://*.clerk.com',
     'https://*.clerk.accounts.dev',
+    'https://challenges.cloudflare.com/turnstile/v0/api.js',
     // Vercel toolbar (preview deployments) + Speed Insights + Analytics
     isVercel
       ? 'https://vercel.live https://*.vercel.live https://vercel.com https://va.vercel-scripts.com'
@@ -62,6 +63,7 @@ const csp = [
     'https://clerk.com',
     'https://*.clerk.com',
     'https://*.clerk.accounts.dev',
+    'https://challenges.cloudflare.com/',
     isVercel ? 'https://vercel.live https://*.vercel.live' : ''
   ]
     .filter(Boolean)
