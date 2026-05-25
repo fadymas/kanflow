@@ -134,7 +134,7 @@ export default function TaskDialogActions({
           <Field
             key={subtask.id}
             orientation="horizontal"
-            className="gap-4 p-3 bg-ksubtle rounded-modal max-w-full flex flex-nowrap"
+            className="gap-4 p-3 bg-kpanal border border-kborder rounded-modal max-w-full flex flex-nowrap"
             role="none"
           >
             <Checkbox

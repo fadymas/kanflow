@@ -23,6 +23,7 @@ import { useEffect } from 'react'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { Button } from '../../ui/button'
 import { Task } from '@/mocks/task.mock'
+import { toast } from 'sonner'
 
 function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const columns = useBoardStore((s) => s.columns) ?? []
@@ -53,7 +54,6 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
     const previousColumns = columns
     const targetColumnId = values.column
 
-    // --- OPTIMISTIC ---
     const tempTask: Task = {
       id: `temp-${crypto.randomUUID()}`,
       title: values.title,
@@ -75,6 +75,7 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
     )
     form.reset()
     setOpen(false)
+    toast.success('Task created', { description: `"${values.title}" has been added.` })
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks`, {
@@ -85,12 +86,12 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
 
       if (!res.ok) {
         setColumns(previousColumns)
+        toast.error('Failed to create task', { description: 'The task has been reverted.' })
         console.error('Failed to create task')
         return
       }
 
       const { task }: { task: Task } = await res.json()
-      // Replace temp task with real one
       setColumns(
         previousColumns.map((col) =>
           String(col.id) == targetColumnId ? { ...col, Task: [...col.Task, task] } : col
@@ -98,6 +99,7 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
       )
     } catch (error) {
       setColumns(previousColumns)
+      toast.error('Failed to create task', { description: 'The task has been reverted.' })
       console.error(error)
     }
   }
@@ -105,7 +107,7 @@ function CreateTaskDialog({ open, setOpen }: { open: boolean; setOpen: (open: bo
   return (
     <DialogContent
       aria-describedby={undefined}
-      className="rounded-modal modal-content bg-kpanal gap-8"
+      className="rounded-modal modal-content scroll-panal bg-kpanal gap-8"
     >
       <DialogHeader>
         <DialogTitle className="bold-20 text-foreground">Add New Task</DialogTitle>

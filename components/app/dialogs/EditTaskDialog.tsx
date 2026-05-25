@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { editTaskSchema, type EditTaskSchema } from '@/lib/validation'
 import { Button } from '../../ui/button'
@@ -33,7 +34,6 @@ function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
   async function onSubmit(values: EditTaskSchema) {
     const previousColumns = columns
 
-    // --- OPTIMISTIC ---
     setColumns(
       columns.map((col) => ({
         ...col,
@@ -45,6 +45,7 @@ function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
       }))
     )
     onSuccess()
+    toast.success('Task updated', { description: `"${values.title}" has been saved.` })
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks`, {
@@ -55,6 +56,7 @@ function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
 
       if (!res.ok) {
         setColumns(previousColumns)
+        toast.error('Failed to update task', { description: 'The changes have been reverted.' })
         console.error('Failed to edit task:', await res.json().catch(() => ({})))
         return
       } else {
@@ -68,6 +70,7 @@ function EditTaskDialog({ taskId, title, description, onSuccess }: Props) {
       }
     } catch (error) {
       setColumns(previousColumns)
+      toast.error('Failed to update task', { description: 'The changes have been reverted.' })
       console.error(error)
     }
   }

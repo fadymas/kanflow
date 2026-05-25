@@ -6,6 +6,7 @@ import { Pipette } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { toast } from 'sonner'
 
 import { colors } from '@/mocks/color.mock'
 import { createColumnSchema, type CreateColumnSchema } from '@/lib/validation'
@@ -58,7 +59,6 @@ function ColumnDialog({ onSuccess, editId }: Props) {
 
     try {
       if (isEditMode && editId) {
-        // --- OPTIMISTIC EDIT ---
         const previousColumns = currentColumns
         const optimisticColumns = currentColumns.map((col) =>
           col.id == editId ? { ...col, name: values.title, color: values.color } : col
@@ -66,6 +66,8 @@ function ColumnDialog({ onSuccess, editId }: Props) {
         setColumns(optimisticColumns)
         form.reset()
         onSuccess?.()
+        toast.success('Column updated', { description: `"${values.title}" has been updated.` })
+
         const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns`, {
           method: 'PATCH',
           body: JSON.stringify({ columnId: editId, name: values.title, color: values.color }),
@@ -73,13 +75,12 @@ function ColumnDialog({ onSuccess, editId }: Props) {
         })
 
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}))
-          console.error('Failed to update column:', data)
           setColumns(previousColumns)
+          toast.error('Failed to update column', { description: 'The change has been reverted.' })
+          console.error('Failed to update column:', await res.json().catch(() => ({})))
           return
         }
       } else {
-        // --- OPTIMISTIC CREATE ---
         const tempId = `temp-${crypto.randomUUID()}`
         const newPosition = currentColumns.length + 1
         const optimisticColumn: Columndb = {
@@ -91,9 +92,10 @@ function ColumnDialog({ onSuccess, editId }: Props) {
           Task: []
         }
         setColumns([...currentColumns, optimisticColumn])
-
         form.reset()
         onSuccess?.()
+        toast.success('Column created', { description: `"${values.title}" has been added.` })
+
         const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/columns`, {
           method: 'POST',
           body: JSON.stringify({ ...values, boardId: activeBoardId }),
@@ -101,21 +103,21 @@ function ColumnDialog({ onSuccess, editId }: Props) {
         })
 
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}))
-          console.error('Failed to create column:', data)
           setColumns(currentColumns)
+          toast.error('Failed to create column', { description: 'The column has been reverted.' })
+          console.error('Failed to create column:', await res.json().catch(() => ({})))
           return
         }
 
         const { column }: { column: Columndb } = await res.json()
-        console.log(column)
-        // Replace the temp column with the real one from the server
         setColumns([...currentColumns, column])
       }
     } catch (error) {
-      console.error(error)
-      // Rollback on unexpected error
       setColumns(currentColumns)
+      toast.error(isEditMode ? 'Failed to update column' : 'Failed to create column', {
+        description: 'The change has been reverted.'
+      })
+      console.error(error)
     }
     queryClient.invalidateQueries({ queryKey: ['columns', activeBoardId] })
   }

@@ -44,7 +44,6 @@ function CustomSidebar() {
         .then((data) => data.boards ?? [])
   })
 
-  // Guard: if persisted activeBoardId no longer exists in boards, clear it
   useEffect(() => {
     if (boards.length > 0 && activeBoardId && !boards.find((b) => b.id === activeBoardId)) {
       setActiveBoardId(boards[0].id, boards[0].name)
@@ -72,33 +71,35 @@ function CustomSidebar() {
         )}
 
         <SidebarContent className={cn('justify-between', isMobile ? 'pb-5' : '')}>
-          <SidebarGroup className="p-0">
-            <SidebarGroupLabel className="mb-4 px-8 text-[12px] font-bold tracking-[2.4px] text-knetural-default">
+          <SidebarGroup className="p-0 min-h-0 flex-1 flex flex-col">
+            <SidebarGroupLabel className="mb-4 px-8 text-[12px] font-bold tracking-[2.4px] text-knetural-default shrink-0">
               {`ALL BOARDS (${boards.length})`}
             </SidebarGroupLabel>
 
-            <SidebarMenu className="gap-2 mb-5">
-              {boards.map((board: Board) => (
-                <SidebarMenuItem key={board.id} className="flex items-center">
-                  <SidebarMenuButton
-                    className="flex items-center w-60.75! h-14 px-8 rounded-r-full cursor-pointer gap-4 py-0 text-knetural-default transition-colors data-[active=true]:bg-primary-DEFAULT dark:data-[active=true]:bg-yellow-500 data-[active=true]:text-white font-bold text-[16px]"
-                    isActive={activeBoardId ? activeBoardId === board.id : false}
-                    onClick={() => {
-                      setActiveBoardId(board.id, board.name)
-                      setOpenMobile(false)
-                      setColumns(columns.filter((col) => col.boardId == String(board.id)))
-                      document.cookie = `active-boardId=${board.id}`
-                      document.cookie = `active-boardName=${board.name}`
-                    }}
-                  >
-                    <SidebarItem className="size-4.5!" />
-                    <span>{board.name}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-
+            {/* Scrollable boards list — grows to fill space, scrolls when overflow */}
+            <SidebarMenu className="gap-2 mb-5  flex-1 min-h-0">
+              <div className="overflow-y-auto mb-2 scroll-panal pb-2">
+                {boards.map((board: Board) => (
+                  <SidebarMenuItem key={board.id} className="flex items-center shrink-0">
+                    <SidebarMenuButton
+                      className="flex items-center w-60.75! h-14 px-8 rounded-r-full cursor-pointer gap-4 py-0 text-knetural-default transition-colors data-[active=true]:bg-primary-DEFAULT dark:data-[active=true]:bg-yellow-500 data-[active=true]:text-white font-bold text-[16px]"
+                      isActive={activeBoardId ? activeBoardId === board.id : false}
+                      onClick={() => {
+                        setActiveBoardId(board.id, board.name)
+                        setOpenMobile(false)
+                        setColumns(columns.filter((col) => col.boardId == String(board.id)))
+                        document.cookie = `active-boardId=${board.id}`
+                        document.cookie = `active-boardName=${board.name}`
+                      }}
+                    >
+                      <SidebarItem className="size-4.5!" />
+                      <span>{board.name}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </div>
               {!isMobile && (
-                <SidebarMenuItem className="flex items-center justify-center">
+                <SidebarMenuItem className="flex items-center justify-center shrink-0">
                   <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
                       <SidebarMenuButton className="flex items-center w-60.75! h-14 px-8 rounded-r-full cursor-pointer gap-4 py-0 text-primary-DEFAULT dark:text-yellow-500 transition-colors font-bold text-[16px]">
@@ -113,7 +114,7 @@ function CustomSidebar() {
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="p-0">
+          <SidebarGroup className="p-0 shrink-0">
             <SidebarGroupContent>
               <SidebarMenu className="gap-4">
                 <SidebarMenuItem className="flex justify-center">

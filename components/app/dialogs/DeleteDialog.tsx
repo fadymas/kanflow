@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { useBoardStore } from '@/providers/board-store-provider'
 import { Board } from '@/mocks/board.mock'
 
@@ -69,6 +70,7 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
     }
     openCallback()
     setOpenTaskId(null)
+    toast.success(`${type} deleted`, { description: `"${deleted}" has been removed.` })
 
     try {
       const res = await fetch(urlMap[type], { method: 'DELETE' })
@@ -101,6 +103,9 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
         } else {
           setColumns(previousColumns)
         }
+        toast.error(`Failed to delete ${type.toLowerCase()}`, {
+          description: 'The item has been restored.'
+        })
         console.error(`Failed to delete ${type}`)
       }
     } catch (error) {
@@ -112,6 +117,9 @@ function DeleteDialog({ type, id, deleted, openCallback }: DeleteProps) {
       } else {
         setColumns(previousColumns)
       }
+      toast.error(`Failed to delete ${type.toLowerCase()}`, {
+        description: 'The item has been restored.'
+      })
       console.error(error)
     } finally {
       setIsDeleting(false)

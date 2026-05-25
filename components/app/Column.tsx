@@ -29,6 +29,7 @@ export default function Column({
   className
 }: ColumnProps) {
   const [open, setOpen] = useState(false)
+
   if (isAddNew) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -36,11 +37,11 @@ export default function Column({
           <Button
             variant="outline"
             className={cn(
-              'min-w-75 min-h-full h-full dark:bg-[rgba(43,44,55,0.5)] bg-[rgba(214,227,249,0.4)] rounded-modal flex flex-col items-center justify-center gap-4  ',
+              'min-w-75 h-full dark:bg-[rgba(43,44,55,0.5)] bg-[rgba(214,227,249,0.4)] rounded-modal flex flex-col items-center justify-center gap-4',
               className
             )}
           >
-            <Plus className="text-knetural-default size-5.25! font-bold " />
+            <Plus className="text-knetural-default size-5.25! font-bold" />
             <span className="text-[24px] font-bold text-knetural-default text-center leading-8">
               New Column
             </span>
@@ -52,9 +53,10 @@ export default function Column({
   }
 
   return (
-    <div className={cn('flex flex-col gap-6 max-w-full min-w-75 w-75 min-h-full', className)}>
-      <div className="flex items-center gap-3">
-        <div className={`w-4 min-h-full rounded-full ring`} style={{ backgroundColor: color }} />
+    <div className={cn('flex flex-col gap-6 min-w-75 w-75 h-full', className)}>
+      {/* Sticky column header */}
+      <div className="flex items-center gap-3 shrink-0">
+        <div className="w-4 h-4 rounded-full ring" style={{ backgroundColor: color }} />
         <div className="flex">
           <h3 className="text-[12px] font-bold text-knetural-default tracking-[0.2em] line-clamp-1 max-w-37.5">
             {title?.toUpperCase()}
@@ -64,26 +66,23 @@ export default function Column({
           </h3>
         </div>
       </div>
+
+      {/* Scrollable task list */}
       <ContextMenu>
-        <ContextMenuTrigger className="h-full">
+        <ContextMenuTrigger className="flex-1 min-h-0">
           <Droppable droppableId={String(id!)} type="COLUMN">
             {(provided, snapshot) => (
               <div
-                className={`flex flex-col gap-6 h-full rounded-md  ${snapshot.isDraggingOver ? 'bg-kpanal/50' : ''}`}
+                className={cn(
+                  'flex flex-col gap-6 h-full pr-1 rounded-md overflow-y-scroll overflow-x-hidden scroll-panal',
+                  snapshot.isDraggingOver ? 'bg-kpanal/50' : ''
+                )}
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
                 {tasks?.map((task, i) => (
                   <TaskCard key={task.id} task={task} index={i} />
                 ))}
-
-                {/* {tasks?.length === 0 && (
-                  <div className="flex flex-col items-center h-full justify-center gap-2 mt-4">
-                    <h4 className=" font-bold text-2xl text-knetural-default text-center w-full line-clamp-2">
-                      right click to edit columns
-                    </h4>
-                  </div>
-                )} */}
                 {provided.placeholder}
               </div>
             )}

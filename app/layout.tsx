@@ -8,6 +8,7 @@ import './globals.css'
 import { cookies } from 'next/headers'
 
 import { ThemeProvider } from 'theme-handler'
+import { Toaster } from '@/components/ui/sonner'
 
 export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_URL
@@ -79,6 +80,7 @@ export default async function RootLayout({
         <ClerkProvider appearance={shadcn} ui={ui}>
           <ThemeProvider theme={theme ?? 'light'}>{children}</ThemeProvider>
         </ClerkProvider>
+        <Toaster richColors position="bottom-right" />
       </body>
     </html>
   )

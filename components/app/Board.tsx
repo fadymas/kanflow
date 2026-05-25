@@ -79,6 +79,7 @@ function Board() {
     })
 
     setColumns(nextColumns!)
+    queryClient.setQueryData(queryKey, nextColumns)
 
     fetch(`${process.env.NEXT_PUBLIC_URL}/api/tasks/drag`, {
       method: 'PATCH',
@@ -93,10 +94,10 @@ function Board() {
     })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to drag task')
-        queryClient.setQueryData(queryKey, nextColumns)
       })
       .catch(() => {
         setColumns(previousColumns!)
+        queryClient.setQueryData(queryKey, previousColumns)
       })
   }
 

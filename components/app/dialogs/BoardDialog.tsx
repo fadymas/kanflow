@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/immutability */
+/* eslint-disable react-hooks/purity */
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -5,6 +7,7 @@ import { Plus, XIcon } from 'lucide-react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import {
   createBoardSchema,
@@ -33,16 +36,13 @@ function BoardDialog({ onSuccess, editId }: Props) {
   const setActiveBoard = useBoardStore((state) => state.setActiveBoard)
   const activeBoardID = useBoardStore((state) => state.activeBoardID)
 
-  // Read directly from cache — no extra useQuery needed
   const boards = queryClient.getQueryData<Board[]>(['boards']) ?? []
 
-  // ---- Create form ----
   const createForm = useForm<CreateBoardSchema>({
     resolver: zodResolver(createBoardSchema),
     defaultValues: { name: '', columns: [{ name: '' }] }
   })
 
-  // ---- Edit form ----
   const editForm = useForm<RenameBoardSchema>({
     resolver: zodResolver(renameBoardSchema),
     defaultValues: { boardId: editId!, name: '' }
@@ -67,9 +67,8 @@ function BoardDialog({ onSuccess, editId }: Props) {
   async function onSubmitCreate(values: CreateBoardSchema) {
     const previousBoards = queryClient.getQueryData<Board[]>(['boards']) ?? []
 
-    // --- OPTIMISTIC: append a temp board ---
     const tempBoard: Board = {
-      id: Date.now(), // negative temp id to avoid collisions
+      id: Date.now(),
       name: values.name,
       ownerId: 0,
       createdAt: new Date().toISOString(),
@@ -79,6 +78,8 @@ function BoardDialog({ onSuccess, editId }: Props) {
     createForm.reset()
     onSuccess()
     setOpenMobile(false)
+    toast.success('Board created', { description: `"${values.name}" is ready to use.` })
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
         method: 'POST',
@@ -88,18 +89,19 @@ function BoardDialog({ onSuccess, editId }: Props) {
 
       if (!res.ok) {
         queryClient.setQueryData<Board[]>(['boards'], previousBoards)
+        toast.error('Failed to create board', { description: 'The board has been reverted.' })
         console.error('Failed to create board:', await res.json().catch(() => ({})))
         return
       }
 
       const data = await res.json()
-      // Replace temp with real board
       queryClient.setQueryData<Board[]>(['boards'], [...previousBoards, data.board])
       setActiveBoard(data.board.id, data.board.name)
       document.cookie = `active-boardId=${data.board.id}`
       document.cookie = `active-boardName=${data.board.name}`
     } catch (error) {
       queryClient.setQueryData<Board[]>(['boards'], previousBoards)
+      toast.error('Failed to create board', { description: 'The board has been reverted.' })
       console.error(error)
     }
   }
@@ -107,7 +109,6 @@ function BoardDialog({ onSuccess, editId }: Props) {
   async function onSubmitEdit(values: RenameBoardSchema) {
     const previousBoards = queryClient.getQueryData<Board[]>(['boards']) ?? []
 
-    // --- OPTIMISTIC: update name in cache ---
     queryClient.setQueryData<Board[]>(
       ['boards'],
       previousBoards.map((b) => (b.id === values.boardId ? { ...b, name: values.name } : b))
@@ -115,9 +116,9 @@ function BoardDialog({ onSuccess, editId }: Props) {
     if (activeBoardID === values.boardId) {
       setActiveBoard(values.boardId, values.name)
     }
-
     editForm.reset()
     onSuccess()
+    toast.success('Board renamed', { description: `Renamed to "${values.name}".` })
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/boards`, {
@@ -132,11 +133,11 @@ function BoardDialog({ onSuccess, editId }: Props) {
           const original = previousBoards.find((b) => b.id === values.boardId)
           if (original) setActiveBoard(original.id, original.name)
         }
+        toast.error('Failed to rename board', { description: 'The name has been reverted.' })
         console.error('Failed to rename board:', await res.json().catch(() => ({})))
         return
       }
 
-      // Confirmed — invalidate to get fresh server data
       await queryClient.invalidateQueries({ queryKey: ['boards'] })
     } catch (error) {
       queryClient.setQueryData<Board[]>(['boards'], previousBoards)
@@ -144,12 +145,16 @@ function BoardDialog({ onSuccess, editId }: Props) {
         const original = previousBoards.find((b) => b.id === values.boardId)
         if (original) setActiveBoard(original.id, original.name)
       }
+      toast.error('Failed to rename board', { description: 'The name has been reverted.' })
       console.error(error)
     }
   }
 
   return (
-    <DialogContent className="bg-kpanal modal-content gap-8" aria-describedby={undefined}>
+    <DialogContent
+      className="bg-kpanal modal-content scroll-panal gap-8"
+      aria-describedby={undefined}
+    >
       <DialogHeader>
         <DialogTitle className="text-foreground bold-20">
           {isEditMode ? 'Change Board Name' : 'Add New Board'}
@@ -157,7 +162,6 @@ function BoardDialog({ onSuccess, editId }: Props) {
       </DialogHeader>
 
       {isEditMode ? (
-        // ---- Edit form ----
         <form onSubmit={editForm.handleSubmit(onSubmitEdit)} noValidate>
           <FieldGroup>
             <Controller
@@ -192,7 +196,6 @@ function BoardDialog({ onSuccess, editId }: Props) {
           </Button>
         </form>
       ) : (
-        // ---- Create form ----
         <form onSubmit={createForm.handleSubmit(onSubmitCreate)} noValidate>
           <FieldGroup>
             <Controller
