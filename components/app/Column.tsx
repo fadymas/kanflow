@@ -69,20 +69,22 @@ export default function Column({
 
       {/* Scrollable task list */}
       <ContextMenu>
-        <ContextMenuTrigger className="flex-1 min-h-0">
+        <ContextMenuTrigger className="flex-1 min-h-0 ">
           <Droppable droppableId={String(id!)} type="COLUMN">
             {(provided, snapshot) => (
               <div
                 className={cn(
-                  'flex flex-col gap-6 h-full pr-1 rounded-md overflow-y-scroll overflow-x-hidden scroll-panal',
+                  'flex flex-col gap-6 h-full pr-1 rounded-md ',
                   snapshot.isDraggingOver ? 'bg-kpanal/50' : ''
                 )}
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                {tasks?.map((task, i) => (
-                  <TaskCard key={task.id} task={task} index={i} />
-                ))}
+                <div className="flex flex-col gap-6 h-full overflow-y-auto scroll-panal pr-1">
+                  {tasks?.map((task, i) => (
+                    <TaskCard key={task.id} task={task} index={i} />
+                  ))}
+                </div>
                 {provided.placeholder}
               </div>
             )}
