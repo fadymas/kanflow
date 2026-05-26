@@ -10,6 +10,9 @@ import { cookies } from 'next/headers'
 import { ThemeProvider } from 'theme-handler'
 import { Toaster } from '@/components/ui/sonner'
 
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+
 export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_URL
     ? new URL(process.env.NEXT_PUBLIC_URL)
@@ -78,7 +81,11 @@ export default async function RootLayout({
     >
       <body className="min-h-screen k-background">
         <ClerkProvider appearance={shadcn} ui={ui}>
-          <ThemeProvider theme={theme ?? 'light'}>{children}</ThemeProvider>
+          <ThemeProvider theme={theme ?? 'light'}>
+            {children}
+            <Analytics />
+            <SpeedInsights />
+          </ThemeProvider>
         </ClerkProvider>
         <Toaster richColors position="bottom-right" />
       </body>

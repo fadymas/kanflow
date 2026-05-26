@@ -7,16 +7,15 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import TaskDialogActions from './TaskDialogActions'
-import DropdownMenu from '../../common/DropdownMenu'
+import DropdownMenu from '@/components/common/DropdownMenu'
 import { useBoardStore } from '@/providers/board-store-provider'
 
 export default function TaskDialogModal() {
   const openTaskId = useBoardStore((state) => state.openTaskId)
   const setOpenTaskId = useBoardStore((state) => state.setOpenTaskId)
-  const columns = useBoardStore((state) => state.columns) ?? []
+  const columns = useBoardStore((state) => state.columns)
 
-  const task = columns.flatMap((col) => col.Task).find((t) => t?.id === openTaskId)
-
+  const task = columns!.flatMap((col) => col.Task).find((t) => t?.id == openTaskId)
   if (!task) return null
 
   return (

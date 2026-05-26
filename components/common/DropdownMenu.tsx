@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
-import BoardDialog from '../app/dialogs/BoardDialog'
-import EditTaskDialog from '../app/dialogs/EditTaskDialog'
+import { CreateBoardDialog } from '../app/dialogs/board/CreateBoardDialog'
+import { EditBoardDialog } from '../app/dialogs/board/EditBoardDialog'
+import EditTaskDialog from '../app/dialogs/task/EditTaskDialog'
 import { Button } from '../ui/button'
 import { Dialog } from '../ui/dialog'
 import {
@@ -41,7 +42,7 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
   }
 
   const task =
-    type === 'Task' ? columns.flatMap((col) => col.Task).find((t) => Number(t.id) === id) : null
+    type === 'Task' ? columns.flatMap((col) => col.Task).find((t) => Number(t.id) == id) : null
 
   return (
     <>
@@ -83,13 +84,13 @@ function CustomDropdownMenu({ type, id, deleted }: Props) {
 
       {/* Add Board dialog — outside dropdown */}
       <Dialog open={openAddBoard} onOpenChange={setOpenAddBoard}>
-        <BoardDialog onSuccess={() => setOpenAddBoard(false)} />
+        {openAddBoard && <CreateBoardDialog onSuccess={() => setOpenAddBoard(false)} />}
       </Dialog>
 
       {/* Edit dialog — outside dropdown */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
         {type === 'Board' && openEdit && (
-          <BoardDialog editId={boardId} onSuccess={() => setOpenEdit(false)} />
+          <EditBoardDialog editId={boardId!} onSuccess={() => setOpenEdit(false)} />
         )}
         {type === 'Task' && openEdit && task && (
           <EditTaskDialog

@@ -17,7 +17,7 @@ import {
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 import SwitchDualIconLabelDemo from '../../vendor/shadcn-studio/switch/switch-11'
-import CreateBoard from '../dialogs/BoardDialog'
+import { CreateBoardDialog } from '../dialogs/board/CreateBoardDialog'
 import { UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
@@ -107,7 +107,7 @@ function CustomSidebar() {
                         <span>Create New Board</span>
                       </SidebarMenuButton>
                     </DialogTrigger>
-                    {open && <CreateBoard onSuccess={() => setOpen(false)} />}
+                    {open && <CreateBoardDialog onSuccess={() => setOpen(false)} />}
                   </Dialog>
                 </SidebarMenuItem>
               )}

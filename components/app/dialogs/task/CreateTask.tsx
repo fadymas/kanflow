@@ -2,15 +2,15 @@
 
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '../../ui/button'
-import { Dialog, DialogTrigger } from '../../ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import CreateTaskDialog from './CreateTaskDialog'
 import { useBoardStore } from '@/providers/board-store-provider'
 
 function CreateTask() {
   const [open, setOpen] = useState<boolean>(false)
-  const activeBoardId = useBoardStore((s) => s.activeBoardID)
-  const columns = useBoardStore((s) => s.columns)
+  const columns = useBoardStore((state) => state.columns)
+  const activeBoardId = useBoardStore((state) => state.activeBoardID)
 
   if (!activeBoardId || !columns?.length) return null
 

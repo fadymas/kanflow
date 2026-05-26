@@ -2,7 +2,7 @@ import Image from 'next/image'
 // import MobileNavMenu from './MobileNavMenu'
 import CustomDropdownMenu from '../../common/DropdownMenu'
 import { Show } from '@clerk/nextjs'
-import CreateTask from '../dialogs/CreateTask'
+import CreateTask from '../dialogs/task/CreateTask'
 import Link from 'next/link'
 
 async function Header() {

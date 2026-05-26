@@ -4,7 +4,7 @@ import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '../ui
 import { Dialog } from '../ui/dialog'
 import { useState } from 'react'
 import DeleteDialog from '../app/dialogs/DeleteDialog'
-import ColumnDialog from '../app/dialogs/ColumnDialog'
+import { EditColumnDialog } from '../app/dialogs/column/EditColumnDialog'
 
 interface Props {
   id: number
@@ -50,7 +50,7 @@ function CustomMenuContent({ id, name }: Props) {
           setOpenEdit(!openEdit)
         }}
       >
-        {openEdit && <ColumnDialog onSuccess={() => setOpenEdit(!openEdit)} editId={String(id)} />}
+        {openEdit && <EditColumnDialog onSuccess={() => setOpenEdit(!openEdit)} editId={String(id)} />}
       </Dialog>
     </>
   )

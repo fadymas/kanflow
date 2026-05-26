@@ -9,7 +9,7 @@ import CustomMenuContent from '../common/MenuContent'
 import { Droppable } from '@hello-pangea/dnd'
 import { Task } from '@/mocks/task.mock'
 import { useState } from 'react'
-import ColumnDialog from './dialogs/ColumnDialog'
+import { CreateColumnDialog } from './dialogs/column/CreateColumnDialog'
 
 interface ColumnProps {
   id?: string
@@ -47,7 +47,7 @@ export default function Column({
             </span>
           </Button>
         </DialogTrigger>
-        {open && <ColumnDialog onSuccess={() => setOpen(false)} />}
+        {open && <CreateColumnDialog onSuccess={() => setOpen(false)} />}
       </Dialog>
     )
   }
