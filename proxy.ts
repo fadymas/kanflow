@@ -48,7 +48,6 @@ function getCorsHeaders(req: NextRequest): Record<string, string> {
 }
 
 // ── Middleware ─────────────────────────────────────────────────────────────
-// Keeping clerkMiddleware as the direct default export makes Clerk happy!
 export default clerkMiddleware(async (auth, req) => {
   const userAgent = req.headers.get('user-agent') || ''
   const pathname = req.nextUrl.pathname
@@ -113,7 +112,8 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|xml|txt)).*)',
+    // Exclude static assets but NOT .xml or .txt so sitemap.xml and robots.txt are served dynamically
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     '/(api|trpc)(.*)'
   ]
 }

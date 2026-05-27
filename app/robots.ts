@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next'
 
-export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_URL
+const BASE_URL = process.env.NEXT_PUBLIC_URL || 'https://kanflow-two.vercel.app'
 
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
@@ -11,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/board', '/sign-in', '/sign-up', '/user-profile', '/api/']
       }
     ],
-    sitemap: `${baseUrl}/sitemap.xml`
+    sitemap: `${BASE_URL}/sitemap.xml`
   }
 }
