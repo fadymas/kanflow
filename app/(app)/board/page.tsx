@@ -4,15 +4,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Board',
-  description: 'Manage your Kanban boards and tasks. Drag, drop, and organize your workflow.',
-  openGraph: {
-    title: 'Board | KanFlow',
-    description: 'Manage your Kanban boards and tasks. Drag, drop, and organize your workflow.'
-  },
-  robots: {
-    index: false,
-    follow: false
-  }
+  description: 'Manage your Kanban boards and tasks. Drag, drop, and organize your workflow.'
 }
 
 export default async function Home() {

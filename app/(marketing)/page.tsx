@@ -5,26 +5,7 @@ import { version } from '@/package.json'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'KanFlow — Simplified Task Management',
-  description:
-    'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication. Experience the workflow designed for high-performance teams.',
-  verification: {
-    google: 'gDo-bQE_5gQoEWlpOsKdHaMRERDv7C4pK3XwHPKC3dk'
-  },
-  openGraph: {
-    title: 'KanFlow — Simplified Task Management',
-    description:
-      'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication. Experience the workflow designed for high-performance teams.',
-    url: '/',
-    type: 'website',
-    siteName: 'KanFlow'
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'KanFlow — Simplified Task Management',
-    description:
-      'A real-time Kanban board featuring drag-and-drop tasks, board organization, and secure authentication.'
-  }
+  title: 'Home'
 }
 
 export default function MarketingPage() {
